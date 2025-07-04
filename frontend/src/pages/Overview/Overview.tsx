@@ -1,8 +1,36 @@
 import { motion } from "framer-motion";
 import TreasuryDashboard from "../../components/Dashboard/TreasuryDashboard";
 import DAOTokenMetricsDashboard from "../../components/Dashboard/DAOTokenMetricsDashboard";
+import { Tabs, type TabItem } from "../../components/Tabs";
 
 const Overview = () => {
+  const tabs: TabItem[] = [
+    {
+      id: "treasury",
+      label: "Treasury",
+      icon: <span className="text-green-600">💰</span>,
+      content: <TreasuryDashboard />,
+    },
+    {
+      id: "dao",
+      label: "DAO",
+      icon: <span className="text-blue-600">🏛️</span>,
+      content: <DAOTokenMetricsDashboard />,
+    },
+    {
+      id: "treasury2",
+      label: "Treasury2",
+      icon: <span className="text-green-600">💰</span>,
+      content: <TreasuryDashboard />,
+    },
+    {
+      id: "dao2",
+      label: "DAO2",
+      icon: <span className="text-blue-600">🏛️</span>,
+      content: <DAOTokenMetricsDashboard />,
+    },
+  ];
+
   return (
     <motion.div
       className="bg-gray-50 min-h-screen"
@@ -28,24 +56,14 @@ const Overview = () => {
           </p>
         </motion.div>
 
-        {/* Dashboards */}
-        <div className="space-y-8">
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <TreasuryDashboard />
-          </motion.div>
-
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
-            <DAOTokenMetricsDashboard />
-          </motion.div>
-        </div>
+        {/* Tabbed Dashboards */}
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          <Tabs tabs={tabs} defaultTab="treasury" />
+        </motion.div>
       </div>
     </motion.div>
   );
