@@ -8,7 +8,6 @@ import {GovernorCountingSimple} from "@openzeppelin/contracts/governance/extensi
 import {GovernorStorage} from "@openzeppelin/contracts/governance/extensions/GovernorStorage.sol";
 import {GovernorVotes} from "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import {GovernorVotesQuorumFraction} from "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
-import "@openzeppelin/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 /**
@@ -20,7 +19,6 @@ import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
  *      - GovernorStorage: On-chain proposal storage for transparency
  *      - GovernorVotes: Integration with ERC20Votes or ERC721Votes tokens
  *      - GovernorVotesQuorumFraction: Percentage-based quorum calculation
- *      - GovernorPreventLateQuorum: Protection against late quorum attacks
  */
 contract MyGovernor is
 Governor,
@@ -28,7 +26,6 @@ GovernorSettings,
 GovernorCountingSimple,
 GovernorStorage,
 GovernorVotes,
-GovernorPreventLateQuorum,
 GovernorVotesQuorumFraction
 {
     /**
@@ -40,14 +37,12 @@ GovernorVotesQuorumFraction
      * @param _initialVotingPeriod Duration in seconds that voting remains open
      * @param _initialProposalThreshold Minimum token balance required to create proposals
      * @param _quorumNumeratorValue Numerator for quorum calculation (denominator is 100)
-     * @param _initialVoteExtension Extension period in seconds when late quorum is reached
      *
      * @dev Example values for a typical DAO:
      *      - _initialVotingDelay: 86400 (1 day)
      *      - _initialVotingPeriod: 604800 (7 days)
      *      - _initialProposalThreshold: 1000e18 (1000 tokens)
      *      - _quorumNumeratorValue: 4 (4% quorum)
-     *      - _initialVoteExtension: 86400 (1 day extension)
      */
     constructor(
         string memory _name,
@@ -62,7 +57,6 @@ GovernorVotesQuorumFraction
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod, _initialProposalThreshold)
     GovernorVotes(_token)
     GovernorVotesQuorumFraction(_quorumNumeratorValue)
-    GovernorPreventLateQuorum(_initialVoteExtension)
     {}
 
     ////////////////////////////////////////////////////////////////////////////
@@ -143,7 +137,7 @@ GovernorVotesQuorumFraction
 
     /**
      * @notice Returns the deadline for voting on a proposal, including any extensions
-     * @dev Overrides both Governor and GovernorPreventLateQuorum implementations
+     * @dev Overrides Governor implementations
      *      The deadline may be extended if quorum is reached close to the original deadline
      * @param proposalId The unique identifier of the proposal
      * @return The final voting deadline as a timestamp or block number
@@ -151,7 +145,7 @@ GovernorVotesQuorumFraction
     function proposalDeadline(uint256 proposalId)
     public
     view
-    override(Governor, GovernorPreventLateQuorum)
+    override(Governor)
     returns (uint256)
     {
         return super.proposalDeadline(proposalId);
@@ -209,13 +203,12 @@ GovernorVotesQuorumFraction
 
     /**
      * @notice Internal hook called after vote tallies are updated
-     * @dev Overrides both Governor and GovernorPreventLateQuorum implementations
-     *      GovernorPreventLateQuorum uses this to potentially extend voting deadlines
+     * @dev Overrides Governor implementations
      * @param proposalId The unique identifier of the proposal whose tally was updated
      */
     function _tallyUpdated(uint256 proposalId)
     internal
-    override(Governor, GovernorPreventLateQuorum)
+    override(Governor)
     {
         super._tallyUpdated(proposalId);
     }
