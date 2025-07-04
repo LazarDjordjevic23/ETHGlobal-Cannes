@@ -17,6 +17,46 @@ const OverviewPage = () => {
       icon: <span className="text-blue-600">🏛️</span>,
       content: <DAOTokenMetricsDashboard />,
     },
+    {
+      id: "agents",
+      label: "Agents",
+      icon: <span className="text-purple-600">🤖</span>,
+      content: <span>Agents</span>,
+    },
+    {
+      id: "strategies",
+      label: "Strategies",
+      icon: <span className="text-orange-600">📊</span>,
+      content: (
+        <div className="bg-white rounded-lg border border-gray-200 p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Investment Strategies
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Explore and manage your DAO's investment strategies and portfolio
+            allocations.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h3 className="font-semibold text-gray-900 mb-2">Conservative</h3>
+              <p className="text-sm text-gray-600">Low risk, stable returns</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h3 className="font-semibold text-gray-900 mb-2">Balanced</h3>
+              <p className="text-sm text-gray-600">
+                Moderate risk, balanced growth
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h3 className="font-semibold text-gray-900 mb-2">Aggressive</h3>
+              <p className="text-sm text-gray-600">
+                High risk, high potential returns
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+    },
   ];
 
   return (
