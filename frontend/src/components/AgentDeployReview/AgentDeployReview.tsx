@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { evmNetworks } from "../../constants/chains";
+import { useNavigate } from "react-router";
 
 interface Agent {
   id: number;
@@ -8,16 +9,18 @@ interface Agent {
   description: string;
   status: string;
   strategy: string;
-  risk: string;
 }
 
-interface Step2Props {
+interface AgentDeployReviewProps {
   selectedAgent: Agent;
   onBack: () => void;
 }
 
-const Step2 = ({ selectedAgent, onBack }: Step2Props) => {
-  const [riskLevel, setRiskLevel] = useState(selectedAgent.risk.toLowerCase());
+const AgentDeployReview = ({
+  selectedAgent,
+  onBack,
+}: AgentDeployReviewProps) => {
+  const navigate = useNavigate();
   const [selectedChain, setSelectedChain] = useState<number>(
     evmNetworks[0].chainId
   );
@@ -25,9 +28,14 @@ const Step2 = ({ selectedAgent, onBack }: Step2Props) => {
   const [daoTokenSymbol, setDaoTokenSymbol] = useState("");
   const [governanceName, setGovernanceName] = useState("");
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    navigate("/overview");
+  };
+
   return (
     <motion.div
-      className="min-h-screen bg-gray-50"
+      className="bg-gray-50"
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -100 }}
@@ -66,7 +74,7 @@ const Step2 = ({ selectedAgent, onBack }: Step2Props) => {
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Configure Your Agent
+            Configure Your DAO
           </h1>
           <p className="text-lg text-gray-600">
             Set up your selected agent: {selectedAgent.name}
@@ -107,11 +115,12 @@ const Step2 = ({ selectedAgent, onBack }: Step2Props) => {
         </motion.div>
 
         {/* Configuration Options */}
-        <motion.div
+        <motion.form
           className="bg-white rounded-lg border border-gray-200 p-6"
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
+          onSubmit={handleSubmit}
         >
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             DAO Configuration
@@ -224,35 +233,19 @@ const Step2 = ({ selectedAgent, onBack }: Step2Props) => {
               </div>
             </div>
 
-            {/* Risk Level */}
-            <div className="border-t pt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Risk Level
-              </label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={riskLevel}
-                onChange={(e) => setRiskLevel(e.target.value)}
-              >
-                <option value="low">Low Risk</option>
-                <option value="medium">Medium Risk</option>
-                <option value="high">High Risk</option>
-                <option value="yolo">YOLO</option>
-              </select>
-            </div>
-
             <motion.button
+              type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Deploy DAO & Agent
+              Deploy DAO
             </motion.button>
           </div>
-        </motion.div>
+        </motion.form>
       </div>
     </motion.div>
   );
 };
 
-export default Step2;
+export default AgentDeployReview;

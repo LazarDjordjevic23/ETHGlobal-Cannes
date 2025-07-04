@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import AgentCard from "./AgentCard";
-import Step2 from "../Step2/Step2";
+import AgentDeployReview from "../AgentDeployReview/AgentDeployReview";
 
 interface Agent {
   id: number;
@@ -54,10 +54,10 @@ const ChooseAgentUI = () => {
     setSelectedAgent(null);
   };
 
-  // Show Step2 if an agent is selected
+  // Show AgentDeployReview if an agent is selected
   if (selectedAgent) {
     return (
-      <Step2
+      <AgentDeployReview
         selectedAgent={selectedAgent}
         onBack={handleBackToAgentSelection}
       />
@@ -66,7 +66,7 @@ const ChooseAgentUI = () => {
 
   return (
     <motion.div
-      className="min-h-screen bg-gray-50"
+      className="bg-gray-50"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

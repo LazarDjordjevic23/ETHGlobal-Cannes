@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router";
-import { DeployAgentPage, Home } from "./routes";
+import { DeployAgentPage, Home, Overview } from "./routes";
 import App from "@/App";
 
 export const router = createBrowserRouter([
@@ -14,6 +14,10 @@ export const router = createBrowserRouter([
       {
         path: "/home",
         element: <Home />,
+      },
+      {
+        path: "/overview",
+        element: <Overview />,
       },
     ],
   },
