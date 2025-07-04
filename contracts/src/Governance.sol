@@ -12,18 +12,18 @@ import "@openzeppelin/contracts/governance/extensions/GovernorPreventLateQuorum.
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 contract MyGovernor is
-    Governor,
-    GovernorSettings,
-    GovernorCountingSimple,
-    GovernorStorage,
-    GovernorVotes,
-    GovernorPreventLateQuorum,
-    GovernorVotesQuorumFraction
+Governor,
+GovernorSettings,
+GovernorCountingSimple,
+GovernorStorage,
+GovernorVotes,
+GovernorPreventLateQuorum,
+GovernorVotesQuorumFraction
 {
     constructor(
         string memory _name,
         IVotes _token,
-        int48 _initialVotingDelay,
+        uint48 _initialVotingDelay,  // Changed from int48 to uint48
         uint32 _initialVotingPeriod,
         uint256 _initialProposalThreshold,
         uint256 _quorumNumeratorValue,
@@ -97,7 +97,62 @@ contract MyGovernor is
     returns (uint256)
     { return super.proposalThreshold(); }
 
-    // The following functions are overrides required by Solidity.
+    /**
+     * @notice Retrieves the proposal deadline, accounting for late quorum extensions.
+     * @param proposalId The ID of the proposal to query.
+     * @return The deadline for the proposal.
+     */
+    function proposalDeadline(uint256 proposalId)
+    public
+    view
+    override(Governor, GovernorPreventLateQuorum)
+    returns (uint256)
+    { return super.proposalDeadline(proposalId); }
+
+    /**
+     * @notice Internal function called when vote tallies are updated.
+     * @param proposalId The ID of the proposal whose tally was updated.
+     */
+    function _tallyUpdated(uint256 proposalId)
+    internal
+    override(Governor, GovernorPreventLateQuorum)
+    { super._tallyUpdated(proposalId); }
+
+    /**
+     * @notice Retrieves the address of the executor configured in the timelock control.
+     * @return The address of the executor.
+     */
+    function _executor()
+    internal
+    view
+    override(Governor)
+    returns (address)
+    { return super._executor(); }
+
+    /**
+     * @dev Returns the current timestamp as a `uint48`.
+     * @return The current timestamp.
+     */
+    function clock()
+    public
+    view
+    override(Governor,GovernorVotes)
+    returns (uint48) { return uint48(block.timestamp); }
+
+    /**
+     * @dev Returns the clock mode as a string.
+     * @return The clock mode.
+     */
+    function CLOCK_MODE()
+    public
+    view
+    virtual
+    override(Governor,GovernorVotes)
+    returns (string memory) { return "mode=timestamp"; }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // OpenZeppelin Governance Function Overrides
+    ////////////////////////////////////////////////////////////////////////////
 
     function _propose(address[] memory targets, uint256[] memory values, bytes[] memory calldatas, string memory description, address proposer)
     internal
@@ -106,4 +161,45 @@ contract MyGovernor is
     {
         return super._propose(targets, values, calldatas, description, proposer);
     }
+
+    /**
+     * @notice Cancels operations from a proposal.
+     * @param targets The addresses of the contracts to interact with.
+     * @param values The values (ETH) to send in the interactions.
+     * @param calldatas The encoded data of the interactions.
+     * @param descriptionHash The hash of the proposal description.
+     * @return The ID of the canceled proposal.
+     */
+    function _cancel(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    )
+    internal
+    override(Governor)
+    returns (uint256) {
+        return super._cancel(targets, values, calldatas, descriptionHash);
+    }
+
+    /**
+     * @notice Casts a vote on a proposal.
+     * @param proposalId The ID of the proposal to vote on.
+     * @param account The address of the voter.
+     * @param support The vote choice (true for yes, false for no).
+     * @param reason A brief description of the reason for the vote.
+     * @param params The parameters for the vote.
+     * @return The ID of the vote.
+     */
+    function _castVote(
+        uint256 proposalId,
+        address account,
+        uint8 support,
+        string memory reason,
+        bytes memory params
+    )
+    internal
+    virtual
+    override(Governor)
+    returns (uint256) { return super._castVote(proposalId, account, support, reason,params); }
 }
