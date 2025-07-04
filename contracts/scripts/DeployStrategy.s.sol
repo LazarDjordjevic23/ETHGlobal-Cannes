@@ -43,28 +43,31 @@ contract DeployStrategy is BaseScript {
         console.log("Strategy address:", address(strategy));
 
         // Test Strategy 1 metrics
-        (uint256 apy1, uint256 tvl1, uint256 util1, uint256 risk1, uint256 liq1) = strategy.getStrategy1Metrics();
+        (uint256 apy1, uint256 tvl1, uint256 util1, uint256 risk1, uint256 liq1, string memory desc1) = strategy.getStrategy1Metrics();
         console.log("Strategy 1 - APY:", apy1);
         console.log("Strategy 1 - TVL:", tvl1 / 1e18);
         console.log("Strategy 1 - Utilization:", util1);
         console.log("Strategy 1 - Sharpe Ratio:", risk1);
         console.log("Strategy 1 - Withdrawal Liquidity:", liq1);
+        console.log("Strategy 1 - Description:", desc1);
 
         // Test Strategy 2 metrics
-        (uint256 apy2, uint256 tvl2, uint256 util2, uint256 risk2, uint256 liq2) = strategy.getStrategy2Metrics();
+        (uint256 apy2, uint256 tvl2, uint256 util2, uint256 risk2, uint256 liq2, string memory desc2) = strategy.getStrategy2Metrics();
         console.log("Strategy 2 - APY:", apy2);
         console.log("Strategy 2 - TVL:", tvl2 / 1e18);
         console.log("Strategy 2 - Utilization:", util2);
         console.log("Strategy 2 - Sharpe Ratio:", risk2);
         console.log("Strategy 2 - Withdrawal Liquidity:", liq2);
+        console.log("Strategy 2 - Description:", desc2);
 
         // Test Strategy 3 metrics
-        (uint256 apy3, uint256 tvl3, uint256 util3, uint256 risk3, uint256 liq3) = strategy.getStrategy3Metrics();
+        (uint256 apy3, uint256 tvl3, uint256 util3, uint256 risk3, uint256 liq3, string memory desc3) = strategy.getStrategy3Metrics();
         console.log("Strategy 3 - APY:", apy3);
         console.log("Strategy 3 - TVL:", tvl3 / 1e18);
         console.log("Strategy 3 - Utilization:", util3);
         console.log("Strategy 3 - Sharpe Ratio:", risk3);
         console.log("Strategy 3 - Withdrawal Liquidity:", liq3);
+        console.log("Strategy 3 - Description:", desc3);
 
         // Log next steps
         console.log("=== Next Steps ===");

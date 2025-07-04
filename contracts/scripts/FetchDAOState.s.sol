@@ -106,31 +106,34 @@ contract FetchDAOState is BaseScript {
         console.log("Strategy ETHToken Balance:", strategy.getTokenBalance(ethTokenAddress) / 1e18, "ETHTokens");
 
         // Strategy 1
-        console.log("\n--- Strategy 1 ---");
-        (uint256 apy1, uint256 tvl1, uint256 util1, uint256 risk1, uint256 liq1) = strategy.getStrategy1Metrics();
-        console.log("APY %:", apy1 / 100);
+        console.log("\n--- Strategy 1 (Aave-like) ---");
+        (uint256 apy1, uint256 tvl1, uint256 util1, uint256 risk1, uint256 liq1, string memory desc1) = strategy.getStrategy1Metrics();
+        console.log("APY:", apy1 / 100);
         console.log("TVL:", tvl1 / 1e18);
-        console.log("Utilization Rate %:", util1 / 100);
-        console.log("Risk-Adjusted Returns (Sharpe) %:", risk1 / 100);
-        console.log("Withdrawal Liquidity %:", liq1 / 100);
+        console.log("Utilization Rate:", util1 / 100);
+        console.log("Risk-Adjusted Returns (Sharpe):", risk1 / 100);
+        console.log("Withdrawal Liquidity:", liq1 / 100);
+        console.log("Description:", desc1);
 
         // Strategy 2
-        console.log("\n--- Strategy 2 ---");
-        (uint256 apy2, uint256 tvl2, uint256 util2, uint256 risk2, uint256 liq2) = strategy.getStrategy2Metrics();
-        console.log("APY %:", apy2 / 100);
+        console.log("\n--- Strategy 2 (Lido-like) ---");
+        (uint256 apy2, uint256 tvl2, uint256 util2, uint256 risk2, uint256 liq2, string memory desc2) = strategy.getStrategy2Metrics();
+        console.log("APY:", apy2 / 100);
         console.log("TVL:", tvl2 / 1e18);
-        console.log("Utilization Rate %:", util2 / 100);
-        console.log("Risk-Adjusted Returns (Sharpe) %:", risk2 / 100);
-        console.log("Withdrawal Liquidity %:", liq2 / 100);
+        console.log("Utilization Rate:", util2 / 100);
+        console.log("Risk-Adjusted Returns (Sharpe):", risk2 / 100);
+        console.log("Withdrawal Liquidity:", liq2 / 100);
+        console.log("Description:", desc2);
 
         // Strategy 3
-        console.log("\n--- Strategy 3 ---");
-        (uint256 apy3, uint256 tvl3, uint256 util3, uint256 risk3, uint256 liq3) = strategy.getStrategy3Metrics();
-        console.log("APY %:", apy3 / 100);
+        console.log("\n--- Strategy 3 (Compound-like) ---");
+        (uint256 apy3, uint256 tvl3, uint256 util3, uint256 risk3, uint256 liq3, string memory desc3) = strategy.getStrategy3Metrics();
+        console.log("APY:", apy3 / 100);
         console.log("TVL:", tvl3 / 1e18);
-        console.log("Utilization Rate %:", util3 / 100);
-        console.log("Risk-Adjusted Returns (Sharpe) %:", risk3 / 100);
-        console.log("Withdrawal Liquidity %:", liq3 / 100);
+        console.log("Utilization Rate:", util3 / 100);
+        console.log("Risk-Adjusted Returns (Sharpe):", risk3 / 100);
+        console.log("Withdrawal Liquidity:", liq3 / 100);
+        console.log("Description:", desc3);
 
         // Step 8: Fetch Governance metrics
         console.log("\n=== GOVERNANCE METRICS ===");
