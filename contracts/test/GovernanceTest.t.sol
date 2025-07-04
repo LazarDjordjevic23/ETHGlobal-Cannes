@@ -75,21 +75,22 @@ contract GovernanceTest is Test {
         mockTarget = new MockTarget();
         vm.stopPrank();
 
-        // Delegate voting power to themselves
-        vm.prank(voter1);
-        token.delegate(voter1);
-
-        vm.prank(voter2);
-        token.delegate(voter2);
-
-        vm.prank(voter3);
-        token.delegate(voter3);
-
-        vm.prank(voter4);
-        token.delegate(voter4);
-
-        vm.prank(voter5);
-        token.delegate(voter5);
+        // TODO: IT IS DELEGATED IN THE DAOToken ERC20
+//        // Delegate voting power to themselves
+//        vm.prank(voter1);
+//        token.delegate(voter1);
+//
+//        vm.prank(voter2);
+//        token.delegate(voter2);
+//
+//        vm.prank(voter3);
+//        token.delegate(voter3);
+//
+//        vm.prank(voter4);
+//        token.delegate(voter4);
+//
+//        vm.prank(voter5);
+//        token.delegate(voter5);
     }
 
     function test_CreateProposal() public {

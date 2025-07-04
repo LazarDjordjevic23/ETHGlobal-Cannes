@@ -11,7 +11,7 @@ contract DeployGovernanceSystem is BaseScript {
 
     /**
     * Run this command to deploy the governor:
-    * forge script script/DeployGovernanceSystem.s.sol --rpc-url sepolia --broadcast
+    * forge script scripts/DeployGovernanceSystem.s.sol --rpc-url sepolia --broadcast
     */
 
     function run() external broadcast {
@@ -39,8 +39,11 @@ contract DeployGovernanceSystem is BaseScript {
 //            receivers = new address ;
 //            receivers[0] = _broadcaster;
 //        }
-        address[] memory receivers = new address[](1);
+
+        address[] memory receivers = new address[](2);
         receivers[0] = 0x65CF522114b232cf5f9172F170d82Bc83676F1d6;
+        receivers[1] = 0xd5D03F2d454fF295E24DcB9035E233b57087B641;
+
         console.log("Deploying DAOToken with name:", tokenName);
         DAOToken token = new DAOToken(initialOwner, tokenName, tokenSymbol, receivers);
         console.log("DAOToken deployed at:", address(token));

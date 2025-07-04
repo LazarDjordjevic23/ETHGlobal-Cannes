@@ -20,13 +20,17 @@ contract DAOToken is ERC20, ERC20Burnable, ERC20Pausable, Ownable, ERC20Permit, 
         string memory _symbol,
         address[] memory receivers
     )
-    ERC20(_name, _symbol)
-    Ownable(initialOwner)
-    ERC20Permit(_name)
+        ERC20(_name, _symbol)
+        Ownable(initialOwner)
+        ERC20Permit(_name)
     {
         uint256 nofReceivers = receivers.length;
-        for (uint256 i = 0; i < nofReceivers; i++)
-        _mint(receivers[i], supply / nofReceivers);
+        for (uint256 i = 0; i < nofReceivers; i++){
+            address receiver = receivers[i];
+            _mint(receiver, supply / nofReceivers);
+            _delegate(receiver, receiver);
+        }
+
     }
 
     function pause() public onlyOwner {
