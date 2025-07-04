@@ -3,7 +3,7 @@ import TreasuryDashboard from "../../components/Dashboard/TreasuryDashboard";
 import DAOTokenMetricsDashboard from "../../components/Dashboard/DAOTokenMetricsDashboard";
 import { Tabs, type TabItem } from "../../components/Tabs";
 
-const Overview = () => {
+const OverviewPage = () => {
   const tabs: TabItem[] = [
     {
       id: "treasury",
@@ -14,18 +14,6 @@ const Overview = () => {
     {
       id: "dao",
       label: "DAO",
-      icon: <span className="text-blue-600">🏛️</span>,
-      content: <DAOTokenMetricsDashboard />,
-    },
-    {
-      id: "treasury2",
-      label: "Treasury2",
-      icon: <span className="text-green-600">💰</span>,
-      content: <TreasuryDashboard />,
-    },
-    {
-      id: "dao2",
-      label: "DAO2",
       icon: <span className="text-blue-600">🏛️</span>,
       content: <DAOTokenMetricsDashboard />,
     },
@@ -69,4 +57,4 @@ const Overview = () => {
   );
 };
 
-export default Overview;
+export default OverviewPage;

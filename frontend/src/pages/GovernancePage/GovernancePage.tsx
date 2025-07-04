@@ -3,7 +3,7 @@ import { Tabs, type TabItem } from "../../components/Tabs";
 import ProposalsList from "../../components/Proposals/ProposalsList";
 import RequestProposal from "../../components/Proposals/RequestProposal";
 
-const Proposal = () => {
+const GovernancePage = () => {
   const tabs: TabItem[] = [
     {
       id: "proposals",
@@ -57,4 +57,4 @@ const Proposal = () => {
   );
 };
 
-export default Proposal;
+export default GovernancePage;

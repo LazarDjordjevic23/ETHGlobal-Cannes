@@ -4,10 +4,16 @@ const DeployAgentPage = lazy(
   () => import("@/pages/DeployAgentPage/DeployAgentPage")
 );
 
-const Overview = lazy(() => import("@/pages/Overview/Overview"));
+const OverviewPage = lazy(() => import("@/pages/OverviewPage/OverviewPage"));
 
 const Home = lazy(() => import("@/pages/Home/Home"));
 
-const Proposal = lazy(() => import("@/pages/Proposal/Proposal"));
+const GovernancePage = lazy(
+  () => import("@/pages/GovernancePage/GovernancePage")
+);
 
-export { DeployAgentPage, Home, Overview, Proposal };
+const ProposalDetail = lazy(
+  () => import("@/pages/ProposalDetail/ProposalDetail")
+);
+
+export { DeployAgentPage, Home, OverviewPage, GovernancePage, ProposalDetail };

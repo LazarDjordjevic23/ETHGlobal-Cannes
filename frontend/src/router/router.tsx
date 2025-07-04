@@ -1,5 +1,11 @@
 import { createBrowserRouter } from "react-router";
-import { DeployAgentPage, Home, Overview, Proposal } from "./routes";
+import {
+  DeployAgentPage,
+  Home,
+  OverviewPage,
+  GovernancePage,
+  ProposalDetail,
+} from "./routes";
 import App from "@/App";
 
 export const router = createBrowserRouter([
@@ -17,11 +23,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "/overview",
-        element: <Overview />,
+        element: <OverviewPage />,
       },
       {
         path: "/proposal",
-        element: <Proposal />,
+        element: <GovernancePage />,
+      },
+      {
+        path: "/proposal/:proposalId",
+        element: <ProposalDetail />,
       },
     ],
   },

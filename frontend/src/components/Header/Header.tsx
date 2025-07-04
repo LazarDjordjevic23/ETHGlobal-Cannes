@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = () => {
             Overview
           </Link>
           <Link to="/proposal" className="nav-link">
-            Proposal
+            Governance
           </Link>
         </nav>
       </div>
