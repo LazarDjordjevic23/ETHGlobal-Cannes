@@ -144,6 +144,8 @@ contract GovernanceTest is Test {
         vm.prank(voter2);
         governor.castVote(proposalId, 1);
 
+        moveTimeForward(5);
+
         // Check votes - voter1 and voter2 each have 200 tokens
         (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) = governor.proposalVotes(proposalId);
         assertEq(forVotes, 400e18); // 200 + 200
@@ -152,5 +154,82 @@ contract GovernanceTest is Test {
 
         console2.log("For votes:", forVotes / 1e18);
         console2.log("Against votes:", againstVotes / 1e18);
+    }
+
+    function test_QuorumReachedWithMixedVotes() public {
+        // Create proposal
+        vm.prank(voter1);
+        uint256 proposalId = governor.propose(
+            new address[](1),
+            new uint256[](1),
+            new bytes[](1),
+            "Test quorum"
+        );
+
+        // Move past voting delay
+        moveTimeForward(VOTING_DELAY + 1);
+
+        // 2 FOR (400), 1 AGAINST (200), 1 ABSTAIN (200) = 800 total (80% participation)
+        vm.prank(voter1);
+        governor.castVote(proposalId, 1); // FOR
+        vm.prank(voter2);
+        governor.castVote(proposalId, 1); // FOR
+        vm.prank(voter3);
+        governor.castVote(proposalId, 0); // AGAINST
+        vm.prank(voter4);
+        governor.castVote(proposalId, 2); // ABSTAIN
+
+        moveTimeForward(VOTING_PERIOD);
+
+        // Verify quorum was reached (20% required) and proposal succeeded (more FOR than AGAINST)
+        assertEq(uint256(governor.state(proposalId)), 4); // Succeeded
+    }
+
+    function test_ProposalExecutionChangesState() public {
+        // Setup proposal to change mock contract's value
+        address[] memory targets = new address[](1);
+        targets[0] = address(mockTarget);
+        uint256[] memory values = new uint256[](1);
+        bytes[] memory calldatas = new bytes[](1);
+        calldatas[0] = abi.encodeWithSelector(MockTarget.setValue.selector, 123);
+        string memory description = "Set value to 123";
+
+        // Create proposal
+        vm.prank(voter1);
+        uint256 proposalId = governor.propose(targets, values, calldatas, description);
+
+        // Move past voting delay
+        moveTimeForward(VOTING_DELAY + 1);
+
+        // Vote to pass (3 voters = 600 tokens - 60% participation)
+        vm.prank(voter1);
+        governor.castVote(proposalId, 1); // FOR
+        vm.prank(voter2);
+        governor.castVote(proposalId, 1); // FOR
+        vm.prank(voter3);
+        governor.castVote(proposalId, 1); // FOR
+
+        // Move past voting period
+        moveTimeForward(VOTING_PERIOD + 1);
+
+        // Verify proposal succeeded
+        assertEq(uint256(governor.state(proposalId)), 4, "Proposal should be in Succeeded state");
+
+        // Execute the proposal
+        vm.prank(voter1); // Can be executed by anyone
+        governor.execute(
+            targets,
+            values,
+            calldatas,
+            keccak256(bytes(description))
+        );
+
+        // Verify the target contract's state changed
+        assertEq(mockTarget.value(), 123, "Proposal execution should update value");
+
+        // Verify proposal marked as executed
+        assertTrue(governor.hasVoted(proposalId, voter1), "Voter1 should have voted");
+        assertTrue(governor.hasVoted(proposalId, voter2), "Voter2 should have voted");
+        assertTrue(governor.hasVoted(proposalId, voter3), "Voter3 should have voted");
     }
 }
