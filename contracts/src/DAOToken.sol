@@ -20,13 +20,12 @@ contract DAOToken is ERC20, ERC20Burnable, ERC20Permit, ERC20Votes {
         ERC20(_name, _symbol)
         ERC20Permit(_name)
     {
-        uint256 nofReceivers = receivers.length;
-        for (uint256 i = 0; i < nofReceivers; i++){
-            address receiver = receivers[i];
-            _mint(receiver, supply / nofReceivers);
-            // _delegate(receiver, receiver);
-        }
-
+//        uint256 nofReceivers = receivers.length;
+//        for (uint256 i = 0; i < nofReceivers; i++){
+//            address receiver = receivers[i];
+//            _mint(receiver, supply / nofReceivers);
+//            // _delegate(receiver, receiver);
+//        }
     }
 
     function mint(address to, uint256 amount) public {
