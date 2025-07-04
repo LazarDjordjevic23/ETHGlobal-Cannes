@@ -1,6 +1,7 @@
 import React from "react";
 import logo from "@/assets/images/logo.png";
 import { Link, useLocation } from "react-router";
+import { wait } from "@/utils/time";
 
 interface HeaderProps {
   title?: string;
@@ -12,7 +13,8 @@ const Header: React.FC<HeaderProps> = () => {
     return null;
   }
 
-  const handleScrollToTop = () => {
+  const handleScrollToTop = async () => {
+    await wait(300);
     window.scrollTo({ top: 0 });
   };
 

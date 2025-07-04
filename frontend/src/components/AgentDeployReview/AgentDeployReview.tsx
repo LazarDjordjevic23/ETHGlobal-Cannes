@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { evmNetworks } from "../../constants/chains";
 import { useNavigate } from "react-router";
+import { wait } from "@/utils/time";
 
 interface Agent {
   id: number;
@@ -33,7 +34,8 @@ const AgentDeployReview = ({
     navigate("/overview");
   };
 
-  const handleScrollToTop = () => {
+  const handleScrollToTop = async () => {
+    await wait(300);
     window.scrollTo({ top: 0 });
   };
 
