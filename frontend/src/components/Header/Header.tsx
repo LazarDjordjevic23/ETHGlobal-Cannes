@@ -1,16 +1,15 @@
 import React from "react";
-import logo from "@/assets/images/logo2.png";
+import logo from "@/assets/images/logo.png";
 
 interface HeaderProps {
   title?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ title = "ETHGlobal Cannes" }) => {
+const Header: React.FC<HeaderProps> = () => {
   return (
     <header className="header">
       <div className="header-content">
-        {/* <h1 className="header-title">{title}</h1> */}
-        <img src={logo} width={60} height={60} alt="ETHGlobal Cannes" />
+        <img src={logo} width={40} height={40} alt="ETHGlobal Cannes" />
         <nav className="header-nav">
           <a href="#" className="nav-link">
             Home

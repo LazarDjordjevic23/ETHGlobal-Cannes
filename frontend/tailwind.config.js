@@ -2,6 +2,11 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
+    colors: {
+      divider: {
+        primary: "rgb(234, 236, 240)",
+      },
+    },
     extend: {
       borderRadius: {
         0: "0px",
