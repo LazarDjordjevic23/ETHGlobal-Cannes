@@ -1,12 +1,21 @@
 import React from "react";
 import logo from "@/assets/images/logo.png";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 
 interface HeaderProps {
   title?: string;
 }
 
 const Header: React.FC<HeaderProps> = () => {
+  const { pathname } = useLocation();
+  if (pathname === "/home" || pathname === "/") {
+    return null;
+  }
+
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0 });
+  };
+
   return (
     <header className="header">
       <div className="header-content">
@@ -14,10 +23,10 @@ const Header: React.FC<HeaderProps> = () => {
           <img src={logo} width={40} height={40} alt="ETHGlobal Cannes" />
         </Link>
         <nav className="header-nav">
-          <Link to="/overview" className="nav-link">
+          <Link to="/overview" className="nav-link" onClick={handleScrollToTop}>
             Overview
           </Link>
-          <Link to="/proposal" className="nav-link">
+          <Link to="/proposal" className="nav-link" onClick={handleScrollToTop}>
             Governance
           </Link>
         </nav>

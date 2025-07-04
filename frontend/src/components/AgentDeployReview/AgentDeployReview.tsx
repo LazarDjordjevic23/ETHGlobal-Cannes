@@ -33,6 +33,10 @@ const AgentDeployReview = ({
     navigate("/overview");
   };
 
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0 });
+  };
+
   return (
     <motion.div
       className="bg-gray-50"
@@ -238,6 +242,7 @@ const AgentDeployReview = ({
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleScrollToTop}
             >
               Deploy DAO
             </motion.button>
