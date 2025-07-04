@@ -20,7 +20,7 @@ import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
  *      - GovernorVotes: Integration with ERC20Votes or ERC721Votes tokens
  *      - GovernorVotesQuorumFraction: Percentage-based quorum calculation
  */
-contract MyGovernor is
+contract Governance is
 Governor,
 GovernorSettings,
 GovernorCountingSimple,
@@ -50,8 +50,7 @@ GovernorVotesQuorumFraction
         uint48 _initialVotingDelay,
         uint32 _initialVotingPeriod,
         uint256 _initialProposalThreshold,
-        uint256 _quorumNumeratorValue,
-        uint48 _initialVoteExtension
+        uint256 _quorumNumeratorValue
     )
     Governor(_name)
     GovernorSettings(_initialVotingDelay, _initialVotingPeriod, _initialProposalThreshold)

@@ -10,12 +10,24 @@ import {ERC20Votes} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Vo
 import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MyToken is ERC20, ERC20Burnable, ERC20Pausable, Ownable, ERC20Permit, ERC20Votes {
-    constructor(address initialOwner)
-    ERC20("MyToken", "MTK")
+contract DAOToken is ERC20, ERC20Burnable, ERC20Pausable, Ownable, ERC20Permit, ERC20Votes {
+
+    uint256 immutable supply = 1000 * 1e18;
+
+    constructor(
+        address initialOwner,
+        string memory _name,
+        string memory _symbol,
+        address[] memory receivers
+    )
+    ERC20(_name, _symbol)
     Ownable(initialOwner)
-    ERC20Permit("MyToken")
-    {}
+    ERC20Permit(_name)
+    {
+        uint256 nofReceivers = receivers.length;
+        for (uint256 i = 0; i < nofReceivers; i++)
+        _mint(receivers[i], supply / nofReceivers);
+    }
 
     function pause() public onlyOwner {
         _pause();
