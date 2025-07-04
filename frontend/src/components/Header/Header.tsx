@@ -10,7 +10,9 @@ const Header: React.FC<HeaderProps> = () => {
   return (
     <header className="header">
       <div className="header-content">
-        <img src={logo} width={40} height={40} alt="ETHGlobal Cannes" />
+        <Link to="/" className="logo-link">
+          <img src={logo} width={40} height={40} alt="ETHGlobal Cannes" />
+        </Link>
         <nav className="header-nav">
           <Link to="/overview" className="nav-link">
             Overview
