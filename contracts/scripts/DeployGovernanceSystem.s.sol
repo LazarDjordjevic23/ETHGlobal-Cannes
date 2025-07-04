@@ -24,21 +24,8 @@ contract DeployGovernanceSystem is BaseScript {
         // === Deploy DAOToken ===
 
         // Params from config or hardcoded fallback
-        address initialOwner = getConfigAddress(configJson, network, "tokenOwner", _broadcaster);
-        string memory tokenName = getConfigString(configJson, network, "tokenName", "My DAO Token");
-        string memory tokenSymbol = getConfigString(configJson, network, "tokenSymbol", "MDT");
-
-//        // Load receivers from config (optional, else fallback to deployer only)
-//        // Receivers as array of addresses - if not found, fallback to deployer
-//        (bytes memory receiversRaw, bool hasReceivers) = getConfigArray(configJson, network, "tokenReceivers");
-//        address[] memory receivers;
-//        if (hasReceivers) {
-//            // Decode address[] from bytes - JSON parsing returns bytes, convert
-//            receivers = abi.decode(receiversRaw, (address[]));
-//        } else {
-//            receivers = new address ;
-//            receivers[0] = _broadcaster;
-//        }
+        string memory tokenName = "DAO Token";
+        string memory tokenSymbol = "DAO";
 
         address[] memory receivers = new address[](2);
         receivers[0] = 0x65CF522114b232cf5f9172F170d82Bc83676F1d6;
@@ -55,12 +42,11 @@ contract DeployGovernanceSystem is BaseScript {
 
         // === Deploy Governance ===
 
-        string memory governorName = getConfigString(configJson, network, "governorName", "MyDAO Governor");
-        uint48 votingDelay = uint48(getConfigUint(configJson, network, "votingDelay", 86400)); // 1 day default
-        uint32 votingPeriod = uint32(getConfigUint(configJson, network, "votingPeriod", 604800)); // 7 days default
-        uint256 quorumNumerator = getConfigUint(configJson, network, "quorumNumerator", 4); // 4%
-
-        uint256 proposalThresholdPercent = uint256(getConfigUint(configJson, network, "proposalThresholdPercent", 604800));
+        string memory governorName = "DAO Governance";
+        uint48 votingDelay = 0;
+        uint32 votingPeriod = 180;
+        uint256 quorumNumerator = 20;
+        uint256 proposalThresholdPercent = 0;
         uint256 threshold = (token.totalSupply() * proposalThresholdPercent) / 100;
 
         Governance governor = new Governance(
