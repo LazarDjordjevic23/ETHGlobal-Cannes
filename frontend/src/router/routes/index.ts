@@ -8,4 +8,6 @@ const Overview = lazy(() => import("@/pages/Overview/Overview"));
 
 const Home = lazy(() => import("@/pages/Home/Home"));
 
-export { DeployAgentPage, Home, Overview };
+const Proposal = lazy(() => import("@/pages/Proposal/Proposal"));
+
+export { DeployAgentPage, Home, Overview, Proposal };

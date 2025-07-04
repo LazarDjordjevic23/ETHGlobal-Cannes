@@ -1,5 +1,6 @@
 import React from "react";
 import logo from "@/assets/images/logo.png";
+import { Link } from "react-router";
 
 interface HeaderProps {
   title?: string;
@@ -11,15 +12,12 @@ const Header: React.FC<HeaderProps> = () => {
       <div className="header-content">
         <img src={logo} width={40} height={40} alt="ETHGlobal Cannes" />
         <nav className="header-nav">
-          <a href="#" className="nav-link">
-            Home
-          </a>
-          <a href="#" className="nav-link">
-            About
-          </a>
-          <a href="#" className="nav-link">
-            Contact
-          </a>
+          <Link to="/overview" className="nav-link">
+            Overview
+          </Link>
+          <Link to="/proposal" className="nav-link">
+            Proposal
+          </Link>
         </nav>
       </div>
     </header>
