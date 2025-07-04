@@ -58,8 +58,7 @@ contract GovernanceTest is Test {
         receivers[3] = voter4;
         receivers[4] = voter5;
 
-        vm.startPrank(owner);
-        token = new DAOToken(owner, "DAO Token", "DAO", receivers);
+        token = new DAOToken("DAO Token", "DAO", receivers);
 
         // Deploy governance
         governor = new Governance(
@@ -73,24 +72,22 @@ contract GovernanceTest is Test {
 
         // Deploy mock target
         mockTarget = new MockTarget();
-        vm.stopPrank();
 
-        // TODO: IT IS DELEGATED IN THE DAOToken ERC20
-//        // Delegate voting power to themselves
-//        vm.prank(voter1);
-//        token.delegate(voter1);
-//
-//        vm.prank(voter2);
-//        token.delegate(voter2);
-//
-//        vm.prank(voter3);
-//        token.delegate(voter3);
-//
-//        vm.prank(voter4);
-//        token.delegate(voter4);
-//
-//        vm.prank(voter5);
-//        token.delegate(voter5);
+        // Delegate voting power to themselves
+        vm.prank(voter1);
+        token.delegate(voter1);
+
+        vm.prank(voter2);
+        token.delegate(voter2);
+
+        vm.prank(voter3);
+        token.delegate(voter3);
+
+        vm.prank(voter4);
+        token.delegate(voter4);
+
+        vm.prank(voter5);
+        token.delegate(voter5);
     }
 
     function test_CreateProposal() public {

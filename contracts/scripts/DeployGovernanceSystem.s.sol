@@ -45,7 +45,7 @@ contract DeployGovernanceSystem is BaseScript {
         receivers[1] = 0xd5D03F2d454fF295E24DcB9035E233b57087B641;
 
         console.log("Deploying DAOToken with name:", tokenName);
-        DAOToken token = new DAOToken(initialOwner, tokenName, tokenSymbol, receivers);
+        DAOToken token = new DAOToken(tokenName, tokenSymbol, receivers);
         console.log("DAOToken deployed at:", address(token));
 
         // Save address and ABI
