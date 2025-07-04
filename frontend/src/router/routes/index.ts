@@ -6,8 +6,6 @@ const DeployAgentPage = lazy(
 
 const OverviewPage = lazy(() => import("@/pages/OverviewPage/OverviewPage"));
 
-const Home = lazy(() => import("@/pages/Home/Home"));
-
 const GovernancePage = lazy(
   () => import("@/pages/GovernancePage/GovernancePage")
 );
@@ -16,4 +14,12 @@ const ProposalDetail = lazy(
   () => import("@/pages/ProposalDetail/ProposalDetail")
 );
 
-export { DeployAgentPage, Home, OverviewPage, GovernancePage, ProposalDetail };
+const AgentPage = lazy(() => import("@/pages/AgentPage/AgentPage"));
+
+export {
+  DeployAgentPage,
+  OverviewPage,
+  GovernancePage,
+  ProposalDetail,
+  AgentPage,
+};

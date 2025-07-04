@@ -31,6 +31,9 @@ const Header: React.FC<HeaderProps> = () => {
           <Link to="/proposal" className="nav-link" onClick={handleScrollToTop}>
             Governance
           </Link>
+          <Link to="/agents" className="nav-link" onClick={handleScrollToTop}>
+            Agents
+          </Link>
         </nav>
       </div>
     </header>

@@ -1,10 +1,10 @@
 import { createBrowserRouter } from "react-router";
 import {
   DeployAgentPage,
-  Home,
   OverviewPage,
   GovernancePage,
   ProposalDetail,
+  AgentPage,
 } from "./routes";
 import App from "@/App";
 
@@ -18,10 +18,6 @@ export const router = createBrowserRouter([
         element: <DeployAgentPage />,
       },
       {
-        path: "/home",
-        element: <Home />,
-      },
-      {
         path: "/overview",
         element: <OverviewPage />,
       },
@@ -32,6 +28,10 @@ export const router = createBrowserRouter([
       {
         path: "/proposal/:proposalId",
         element: <ProposalDetail />,
+      },
+      {
+        path: "/agents",
+        element: <AgentPage />,
       },
     ],
   },
