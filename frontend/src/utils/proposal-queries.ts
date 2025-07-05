@@ -207,6 +207,7 @@ export async function executeProposalCreation({
     11155111: "ethereum",
     48898: "zuircuit",
     545: "flow",
+    5003: "mantle",
   };
 
   try {

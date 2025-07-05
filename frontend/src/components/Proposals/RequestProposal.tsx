@@ -4,9 +4,10 @@ import { useNavigate } from "react-router";
 import { useAgent } from "@/contexts/agent-context";
 import { getAgentFeatures } from "@/utils/agent-features";
 import { useAccount } from "wagmi";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { executeProposalCreation } from "@/utils/proposal-queries";
 import { wait } from "@/utils/time";
-import type { AvailableChainId } from "@/constants/chains";
+import { availableChains, type AvailableChainId } from "@/constants/chains";
 
 interface ProposalRequest {
   id: string;
@@ -25,18 +26,24 @@ const RequestProposal = () => {
     status: "idle",
   });
 
-  const { chainId } = useAccount();
+  const { chainId, isConnected } = useAccount();
+  const { setShowAuthFlow } = useDynamicContext();
+
+  const handleConnectWallet = () => {
+    setShowAuthFlow(true);
+  };
 
   const handleRequestProposal = async () => {
     const requestId = Date.now().toString();
 
     // Validate chainId
-    if (!chainId || ![11155111, 48898, 545].includes(chainId)) {
+    const supportedChainIds = availableChains.map((chain) => chain.id);
+    if (!chainId || !supportedChainIds.includes(chainId as AvailableChainId)) {
       setProposalRequest({
         id: requestId,
         status: "error",
         error:
-          "Please connect to a supported network (Sepolia, Zircuit, or Flow Testnet)",
+          "Please connect to a supported network (Sepolia, Zircuit, Flow Testnet, or Mantle Sepolia Testnet)",
       });
       return;
     }
@@ -196,27 +203,43 @@ const RequestProposal = () => {
 
               {/* Main Action Button */}
               <motion.button
-                onClick={handleRequestProposal}
-                disabled={!selectedAgent || !chainId}
+                onClick={
+                  selectedAgent && isConnected
+                    ? handleRequestProposal
+                    : !selectedAgent
+                    ? undefined
+                    : handleConnectWallet
+                }
+                disabled={!selectedAgent}
                 className={`font-semibold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 transform ${
-                  selectedAgent && chainId
+                  selectedAgent && isConnected
                     ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105"
+                    : selectedAgent && !isConnected
+                    ? "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white hover:scale-105"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
-                whileHover={selectedAgent && chainId ? { scale: 1.05 } : {}}
-                whileTap={selectedAgent && chainId ? { scale: 0.95 } : {}}
+                whileHover={selectedAgent ? { scale: 1.05 } : {}}
+                whileTap={selectedAgent ? { scale: 0.95 } : {}}
               >
                 <span className="flex items-center gap-3">
                   <span className="text-xl">
-                    {selectedAgent && chainId ? "✨" : "🚫"}
+                    {selectedAgent && isConnected
+                      ? "✨"
+                      : selectedAgent && !isConnected
+                      ? "🔗"
+                      : "🚫"}
                   </span>
-                  {selectedAgent && chainId
+                  {selectedAgent && isConnected
                     ? `Ask ${selectedAgent.name} to Create Proposal`
                     : !selectedAgent
                     ? "Select an Agent First"
                     : "Connect to Supported Network"}
                   <span className="text-xl">
-                    {selectedAgent && chainId ? "✨" : "🚫"}
+                    {selectedAgent && isConnected
+                      ? "✨"
+                      : selectedAgent && !isConnected
+                      ? "🔗"
+                      : "🚫"}
                   </span>
                 </span>
               </motion.button>
