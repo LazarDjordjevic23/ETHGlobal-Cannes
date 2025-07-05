@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import type { ReactNode } from "react";
 
@@ -31,9 +31,9 @@ const Tabs = ({ tabs, className = "", defaultTab }: TabsProps) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex-1 px-6 py-4 text-sm font-medium ${
+                className={`relative flex-1 px-6 py-4 text-sm font-medium hover:bg-gray-50 ${
                   activeTab === tab.id
-                    ? "text-blue-600 bg-blue-50/50"
+                    ? "text-blue-600 bg-blue-50/50 hover:bg-blue-50/50"
                     : "text-gray-600"
                 }`}
               >
@@ -63,7 +63,23 @@ const Tabs = ({ tabs, className = "", defaultTab }: TabsProps) => {
       </div>
 
       {/* Tab Content */}
-      <div className="w-full">{activeTabContent}</div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          className="w-full"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+            duration: 0.3,
+          }}
+        >
+          {activeTabContent}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
