@@ -12,12 +12,6 @@ const OverviewPage = () => {
       content: <DAOTreasuryDashboard />,
     },
     {
-      id: "agents",
-      label: "Agents",
-      icon: <span className="text-purple-600">🤖</span>,
-      content: <span>Agents</span>,
-    },
-    {
       id: "strategies",
       label: "Strategies",
       icon: <span className="text-orange-600">📊</span>,
