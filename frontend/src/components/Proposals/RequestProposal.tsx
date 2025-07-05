@@ -8,6 +8,7 @@ import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { executeProposalCreation } from "@/utils/proposal-queries";
 import { wait } from "@/utils/time";
 import { availableChains, type AvailableChainId } from "@/constants/chains";
+import type { ProposalResponse } from "@/contexts/agent-context";
 
 interface ProposalRequest {
   id: string;
@@ -16,11 +17,12 @@ interface ProposalRequest {
   timestamp?: Date;
   error?: string;
   txHash?: string;
+  response?: ProposalResponse;
 }
 
 const RequestProposal = () => {
   const navigate = useNavigate();
-  const { selectedAgent } = useAgent();
+  const { selectedAgent, setProposalData } = useAgent();
   const [proposalRequest, setProposalRequest] = useState<ProposalRequest>({
     id: "",
     status: "idle",
@@ -71,13 +73,19 @@ const RequestProposal = () => {
         chainId: chainId as AvailableChainId,
       });
 
+      console.log({ result });
+
       if (result) {
+        // Store the full response in context
+        setProposalData(result);
+
         setProposalRequest({
           id: requestId,
           status: "completed",
-          proposalLink: `proposal-${requestId}`,
-          timestamp: new Date(),
+          proposalLink: `proposal-${result.strategy_id}`,
+          timestamp: new Date(result.timestamp),
           txHash: result.tx_hash || result.txHash,
+          response: result,
         });
       } else {
         throw new Error("Failed to create proposal - no response from backend");
@@ -335,6 +343,30 @@ const RequestProposal = () => {
                   </p>
                 )}
 
+                {/* AI Analysis Summary */}
+                {proposalRequest.response && (
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <h4 className="font-semibold text-blue-900 mb-2">
+                      AI Analysis Summary
+                    </h4>
+                    <p className="text-sm text-blue-800 mb-2">
+                      <strong>Strategy ID:</strong>{" "}
+                      {proposalRequest.response.strategy_id}
+                    </p>
+                    <p className="text-sm text-blue-800 mb-2">
+                      <strong>Expected Profit:</strong>{" "}
+                      {
+                        proposalRequest.response.ai_analysis
+                          .strategy_recommendation.expected_profit
+                      }
+                    </p>
+                    <p className="text-sm text-blue-800">
+                      <strong>Status:</strong>{" "}
+                      {proposalRequest.response.ai_analysis.final_output}
+                    </p>
+                  </div>
+                )}
+
                 {proposalRequest.txHash && (
                   <div className="bg-gray-50 rounded-lg p-4 border">
                     <p className="text-sm text-gray-600 mb-2">
@@ -343,6 +375,16 @@ const RequestProposal = () => {
                     <p className="text-xs font-mono text-gray-800 break-all">
                       {proposalRequest.txHash}
                     </p>
+                    {proposalRequest.response?.tx_url && (
+                      <a
+                        href={proposalRequest.response.tx_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2 inline-block"
+                      >
+                        View on Etherscan →
+                      </a>
+                    )}
                   </div>
                 )}
               </div>

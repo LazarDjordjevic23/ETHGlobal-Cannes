@@ -12,6 +12,7 @@ import {
   getProposalVotes,
   getProposalByIndex,
 } from "../../utils/proposal-queries";
+import { useAgent } from "@/contexts/agent-context";
 
 export interface Votes {
   for: number;
@@ -39,11 +40,16 @@ interface ProposalData {
     function: string;
     inputs: string;
   }>;
+  strategyId?: number;
+  expectedProfit?: string;
+  txUrl?: string;
+  txHash?: string;
 }
 
 const ProposalDetail = () => {
   const { proposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
+  const { proposalData: contextProposalData } = useAgent();
 
   // Fetch proposal by index (assuming proposalId is the index)
   const { data: proposal } = useQuery({
@@ -59,7 +65,7 @@ const ProposalDetail = () => {
     enabled: !!proposal?.proposalId,
   });
 
-  console.log({ proposal, votes });
+  console.log({ proposal, votes, contextProposalData });
 
   // Create details from blockchain data if proposal exists
   const getProposalDetails = () => {
@@ -92,16 +98,29 @@ This proposal will execute the following operations:
 `;
   };
 
+  // Generate description based on AI analysis
+  const getProposalDescription = () => {
+    if (contextProposalData?.ai_analysis?.strategy_recommendation?.reasoning) {
+      return contextProposalData.ai_analysis.strategy_recommendation.reasoning;
+    }
+    return "This proposal aims to optimize treasury management through strategic DeFi protocol integration to maximize returns while maintaining acceptable risk levels.";
+  };
+
   const proposalData: ProposalData = {
     id: proposalId || "1",
-    title: "Increase Treasury Allocation for DeFi Yield Farming",
-    description:
-      "This proposal aims to allocate 30% of our treasury funds to high-yield DeFi protocols to maximize returns for the DAO while maintaining acceptable risk levels.",
+    title: "Invest in Strategy",
+    description: getProposalDescription(),
     status: "live",
     createdBy: "AI Agent",
-    createdAt: "2024-01-15T10:00:00Z",
-    startDate: "2024-01-16T00:00:00Z",
-    endDate: "2024-01-22T23:59:59Z",
+    createdAt: contextProposalData?.timestamp || Date.now().toString(),
+    startDate: contextProposalData?.timestamp || Date.now().toString(),
+    endDate: new Date(
+      (contextProposalData?.timestamp
+        ? new Date(contextProposalData.timestamp).getTime()
+        : Date.now()) +
+        1000 * 60 * 60 * 24 * 7
+    ).toISOString(),
+
     votes: votes || {
       for: 1234,
       against: 89,
@@ -110,7 +129,8 @@ This proposal will execute the following operations:
     },
     quorum: 1000,
     aiReasoning:
-      "Based on comprehensive market analysis and risk assessment, I identified several key factors that support this proposal:\n\n1. **Market Opportunity**: Current DeFi yields are significantly higher than traditional treasury management, with established protocols offering 12-18% APY.\n\n2. **Risk Mitigation**: The proposed allocation of 30% maintains a conservative approach while still capturing meaningful yield opportunities. This leaves 70% in stable, liquid assets.\n\n3. **Protocol Selection**: I analyzed over 50 DeFi protocols and identified those with:\n   - Proven track records (2+ years)\n   - Strong security audits\n   - Consistent yield performance\n   - High TVL and liquidity\n\n4. **Treasury Optimization**: Our current treasury of $2.4M is underperforming. This strategy could generate an additional $86,400 annually compared to current yield.\n\n5. **Community Benefit**: Increased treasury returns directly benefit all token holders and provide more resources for DAO operations and community initiatives.",
+      contextProposalData?.reasoning ||
+      "Based on comprehensive market analysis and risk assessment, I identified several key factors that support this proposal:\n\n1. **Market Opportunity**: Current DeFi yields are significantly higher than traditional treasury management, with established protocols offering 12-18% APY.\n\n2. **Risk Mitigation**: The proposed allocation maintains a conservative approach while still capturing meaningful yield opportunities.\n\n3. **Protocol Selection**: I analyzed multiple DeFi protocols and identified those with proven track records, strong security audits, and consistent yield performance.\n\n4. **Treasury Optimization**: This strategy will generate additional returns compared to current yield.\n\n5. **Community Benefit**: Increased treasury returns directly benefit all token holders and provide more resources for DAO operations and community initiatives.",
     details: getProposalDetails(),
     transactions: [
       {
@@ -120,6 +140,12 @@ This proposal will execute the following operations:
         inputs: "asset: USDC, amount: 720000000000",
       },
     ],
+    strategyId: contextProposalData?.strategy_id,
+    expectedProfit:
+      contextProposalData?.ai_analysis?.strategy_recommendation
+        ?.expected_profit,
+    txUrl: contextProposalData?.tx_url,
+    txHash: contextProposalData?.tx_hash || contextProposalData?.txHash,
   };
 
   return (
@@ -134,13 +160,49 @@ This proposal will execute the following operations:
         {/* Back Button */}
         <BackButton onClick={() => navigate("/proposal")} />
 
+        {/* Strategy and Profit Info */}
+        {(proposalData.strategyId || proposalData.expectedProfit) && (
+          <motion.div
+            className="mb-6 bg-white rounded-xl border border-gray-200 p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+          >
+            <div className="flex flex-wrap gap-4 items-center">
+              {proposalData.strategyId && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                  <span className="text-sm font-semibold text-blue-900">
+                    Strategy ID: {proposalData.strategyId}
+                  </span>
+                </div>
+              )}
+              {proposalData.expectedProfit && (
+                <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+                  <span className="text-sm font-semibold text-green-900">
+                    Expected Profit: {proposalData.expectedProfit}
+                  </span>
+                </div>
+              )}
+              {proposalData.txUrl && (
+                <a
+                  href={proposalData.txUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors"
+                >
+                  View Transaction →
+                </a>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Header */}
             <ProposalHeader
               title={proposalData.title}
-              description={proposalData.description}
               status={proposalData.status}
               createdBy={proposalData.createdBy}
               createdAt={proposalData.createdAt}

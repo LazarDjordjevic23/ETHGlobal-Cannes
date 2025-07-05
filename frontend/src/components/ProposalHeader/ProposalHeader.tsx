@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 
 interface ProposalHeaderProps {
   title: string;
-  description: string;
   status: "pending" | "live" | "closed";
   createdBy: string;
   createdAt: string;
@@ -11,7 +10,6 @@ interface ProposalHeaderProps {
 
 const ProposalHeader = ({
   title,
-  description,
   status,
   createdBy,
   createdAt,
@@ -52,7 +50,6 @@ const ProposalHeader = ({
         )}
       </div>
       <h1 className="text-3xl font-bold text-gray-900 mb-4">{title}</h1>
-      <p className="text-lg text-gray-600 mb-4">{description}</p>
       <div className="flex items-center gap-4 text-sm text-gray-500">
         <span>Created: {new Date(createdAt).toLocaleDateString()}</span>
         <span>•</span>
