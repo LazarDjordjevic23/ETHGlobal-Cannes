@@ -14,7 +14,9 @@ const ProposalDetails = ({ details }: ProposalDetailsProps) => {
     >
       <h3 className="text-xl font-bold text-gray-900 mb-4">Proposal Details</h3>
       <div className="prose prose-sm max-w-none">
-        <div className="whitespace-pre-wrap text-gray-700">{details}</div>
+        <pre className="whitespace-pre-wrap break-words text-gray-700 ">
+          {details}
+        </pre>
       </div>
     </motion.div>
   );
