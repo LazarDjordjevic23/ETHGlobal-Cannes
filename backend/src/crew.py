@@ -31,7 +31,8 @@ class ProposalCrew:
         treasury_address: str = "",
         strategy_address: str = "",
         governance_address: str = "",
-        eth_token_address: str = ""
+        eth_token_address: str = "",
+        explorer_url: str = SEPOLIA_EXPLORER_URL
     ):
         self.treasury_service = treasury_service
         self.strategy_service = strategy_service
@@ -40,6 +41,7 @@ class ProposalCrew:
         self.strategy_address = strategy_address
         self.governance_address = governance_address
         self.eth_token_address = eth_token_address
+        self.explorer_url = explorer_url
         
         # Get LLM
         self.llm = get_llm()
@@ -162,7 +164,7 @@ class ProposalCrew:
             You must use the proposal_tool with a JSON string containing:
             {{
                 "proposal_title": "title for the proposal",
-                "proposal_description": "detailed description for governance proposal",
+                "proposal_description": "Investing strategy",
                 "strategy_id": "chosen strategy id (1, 2, or 3)",
                 "expected_profit": "estimated profit in USD",
                 "risk_assessment": "risk analysis",
@@ -252,7 +254,7 @@ class ProposalCrew:
                     tx_hash = hash_match.group()
                     print(f"✅ Proposal submitted successfully!")
                     print(f"📊 Transaction Hash: {tx_hash}")
-                    print(f"🔍 View on Etherscan: {SEPOLIA_EXPLORER_URL}{tx_hash}")
+                    print(f"🔍 View on Explorer: {self.explorer_url}{tx_hash}")
             elif "ERROR:" in result_str:
                 print("❌ Failed to submit proposal:")
                 print(result_str)
@@ -359,26 +361,21 @@ class ProposalCrew:
                 if filtered_sentences:
                     reasoning = " ".join(filtered_sentences[:3])  # Take first 3 relevant sentences
                         
-            # Get the recommended strategy for response
-            recommended_strategy = next((s for s in strategies if s.strategy_id == recommended_strategy_id), strategies[0])
-            
-            # Calculate expected profit based on token balance and strategy APY
-            eth_token_balance_in_tokens = treasury_data.eth_token_balance / 1e18
-            expected_annual_profit = eth_token_balance_in_tokens * (recommended_strategy.apy / 10000)  # APY is in basis points
-            expected_profit_usd = expected_annual_profit * 2000  # Mock ETH price for calculation
+            # Set description to hardcoded value
+            description = "Investing strategy"
             
             # Create the response
             response = {
                 "timestamp": datetime.now(UTC).isoformat(),
-                "tx_url": f"{SEPOLIA_EXPLORER_URL}{tx_hash}" if tx_hash else None,
+                "tx_url": f"{self.explorer_url}{tx_hash}" if tx_hash else None,
                 "strategy_id": recommended_strategy_id,
                 "reasoning": reasoning,
+                "description": description,
                 "ai_analysis": {
                     "final_output": str(result),
                     "strategy_recommendation": {
                         "strategy_id": recommended_strategy_id,
-                        "reasoning": reasoning,
-                        "expected_profit": f"${expected_profit_usd:,.2f}"
+                        "reasoning": reasoning
                     }
                 }
             }

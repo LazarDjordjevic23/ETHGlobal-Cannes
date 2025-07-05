@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # RPC and Wallet Configuration
-RPC_URL = os.getenv("ETHEREUM_RPC_URL", "https://sepolia.infura.io/v3/your-project-id")
 PRIVATE_KEY = os.getenv("AI_AGENT_PRIVATE_KEY", "")
 
 # Contract Addresses
