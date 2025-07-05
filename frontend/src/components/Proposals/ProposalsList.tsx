@@ -20,7 +20,6 @@ interface Proposal {
 const ProposalsList = () => {
   const navigate = useNavigate();
 
-  // Mock data - in real app this would come from your backend/blockchain
   const proposals: Proposal[] = [
     {
       id: "1",

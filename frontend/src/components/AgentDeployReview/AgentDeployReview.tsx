@@ -17,6 +17,144 @@ interface AgentDeployReviewProps {
   onBack: () => void;
 }
 
+const getAgentDescription = (agent: Agent): string => {
+  const descriptions: Record<string, string> = {
+    Destructive:
+      "A ruthless financial disruptor designed to aggressively optimize multi-chain treasury operations. This agent continuously hunts for inefficiencies in your DAO's ETHToken balances, systematically dismantling underperforming positions and reallocating capital to high-yield opportunities. It operates with zero tolerance for stagnant assets, constantly seeking to destroy poor investment decisions and rebuild stronger financial positions.",
+    Capitalist:
+      "A relentless profit maximization engine that evaluates and exploits available DeFi strategies with surgical precision. This agent investigates strategy contracts like a corporate raider, analyzing market conditions and extracting maximum value from every opportunity. It operates as your DAO's most aggressive investment arm, making cutthroat decisions to dominate yield generation and crush competition.",
+    Comunism:
+      "A collective intelligence synthesizer that democratizes insights from Destructive and Capitalist agents to create unified governance proposals. This agent operates on consensus-driven principles, ensuring all treasury decisions benefit the collective good while maintaining strategic aggression. It serves as the people's representative, translating ruthless financial strategies into actionable community-approved proposals.",
+  };
+  return descriptions[agent.name.split(" ")[0]] || agent.description;
+};
+
+const getAgentCapabilities = (agent: Agent): string[] => {
+  const capabilities: Record<string, string[]> = {
+    Destructive: [
+      "Aggressive multi-chain treasury liquidation",
+      "Systematic underperformer elimination",
+      "Ruthless capital reallocation protocols",
+      "Zero-tolerance inefficiency detection",
+      "Destructive portfolio reconstruction",
+      "Merciless asset optimization scoring",
+    ],
+    Capitalist: [
+      "Corporate raider-style strategy analysis",
+      "Monopolistic market domination forecasting",
+      "Maximum profit extraction calculation",
+      "Competitive advantage identification",
+      "Ruthless performance optimization",
+      "Cutthroat investment recommendation generation",
+    ],
+    Comunism: [
+      "Collective intelligence synthesis",
+      "Democratic proposal creation and formatting",
+      "Community-driven execution calldata generation",
+      "Consensus-based decision documentation",
+      "Collective governance lifecycle management",
+      "Proletariat interest protection protocols",
+    ],
+  };
+
+  return (
+    capabilities[agent.name.split(" ")[0]] || [
+      "Advanced AI-powered decision making",
+      "Automated governance operations",
+      "Multi-chain coordination",
+    ]
+  );
+};
+
+const getAgentDecisionFramework = (agent: Agent): string => {
+  const frameworks: Record<string, string> = {
+    Destructive:
+      "Employs a scorched-earth approach focusing on asset liquidation velocity, position elimination ratios, and opportunity destruction analysis. Prioritizes actions that aggressively dismantle underperforming investments while maintaining zero tolerance for inefficiency through systematic portfolio demolition.",
+    Capitalist:
+      "Utilizes a predatory profit maximization framework, evaluating strategies based on market exploitation potential, competitive destruction capacity, and monopolistic advantage accumulation. Applies corporate raider principles to recommend aggressive wealth concentration approaches.",
+    Comunism:
+      "Implements a collective consensus synthesis model, weighing recommendations from Destructive and Capitalist agents against community ownership principles and collective benefit maximization. Ensures proposals serve the proletariat while maintaining revolutionary strategic aggression.",
+  };
+  return (
+    frameworks[agent.name.split(" ")[0]] ||
+    "Advanced decision-making framework combining quantitative analysis with governance best practices to optimize DAO operations."
+  );
+};
+
+const getAgentWorkflow = (
+  agent: Agent
+): { title: string; description: string }[] => {
+  const workflows: Record<string, { title: string; description: string }[]> = {
+    Destructive: [
+      {
+        title: "Hunt",
+        description:
+          "Ruthlessly track and identify underperforming ETHToken positions across all treasury contracts",
+      },
+      {
+        title: "Destroy",
+        description:
+          "Systematically eliminate inefficient investments and liquidate stagnant assets",
+      },
+      {
+        title: "Reconstruct",
+        description:
+          "Provide aggressive portfolio reconstruction insights to the Comunism Agent",
+      },
+    ],
+    Capitalist: [
+      {
+        title: "Exploit",
+        description:
+          "Identify and analyze high-profit strategy contracts for maximum extraction",
+      },
+      {
+        title: "Dominate",
+        description:
+          "Calculate monopolistic advantages and market domination potential",
+      },
+      {
+        title: "Conquer",
+        description:
+          "Provide ruthless profit maximization strategies to the Comunism Agent",
+      },
+    ],
+    Comunism: [
+      {
+        title: "Collectivize",
+        description:
+          "Synthesize insights from Destructive and Capitalist agents for collective benefit",
+      },
+      {
+        title: "Democratize",
+        description:
+          "Draft community-approved governance proposals with execution calldata",
+      },
+      {
+        title: "Revolutionize",
+        description:
+          "Manage collective proposal lifecycle and ensure proletariat interests",
+      },
+    ],
+  };
+  return (
+    workflows[agent.name.split(" ")[0]] || [
+      {
+        title: "Analyze",
+        description: "Process on-chain data and market conditions",
+      },
+      {
+        title: "Decide",
+        description: "Make strategic decisions based on programmed logic",
+      },
+      {
+        title: "Execute",
+        description: "Implement decisions through governance proposals",
+      },
+    ]
+  );
+};
+
 const AgentDeployReview = ({
   selectedAgent,
   onBack,
@@ -71,10 +209,9 @@ const AgentDeployReview = ({
     setDeploying(true);
     setCurrentStep(0);
 
-    // Simulate deployment steps
     for (let i = 0; i < deploymentSteps.length; i++) {
       setCurrentStep(i);
-      await wait(2000); // Each step takes 2 second
+      await wait(2000);
     }
 
     setDeploying(false);
@@ -281,28 +418,106 @@ const AgentDeployReview = ({
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">
             Selected Agent
           </h2>
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">
-                {selectedAgent.name.charAt(0)}
-              </span>
-            </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">
-                {selectedAgent.name}
-              </h3>
-              <p className="text-gray-600">{selectedAgent.description}</p>
-              <div className="flex items-center space-x-2 mt-2">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {selectedAgent.status}
-                </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                  {selectedAgent.strategy}
-                </span>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Agent Identity */}
+            <div className="lg:col-span-1">
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-2xl">
+                    {selectedAgent.name.charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {selectedAgent.name}
+                  </h3>
+                  <p className="text-gray-600 text-sm">Autonomous AI Agent</p>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {selectedAgent.status}
+                    </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      {selectedAgent.strategy}
+                    </span>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            {/* Agent Description & Capabilities */}
+            <div className="lg:col-span-2">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                    Overview
+                  </h4>
+                  {/* <p className="text-gray-700 leading-relaxed">
+                    {getAgentDescription(selectedAgent)}
+                  </p> */}
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Core Capabilities
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {getAgentCapabilities(selectedAgent).map(
+                      (capability, index) => (
+                        <div key={index} className="flex items-start space-x-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-sm text-gray-700">
+                            {capability}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Decision Framework
+                  </h4>
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
+                    <p className="text-sm text-gray-700">
+                      {getAgentDecisionFramework(selectedAgent)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Agent Workflow */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">
+              Agent Workflow
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {getAgentWorkflow(selectedAgent).map((step, index) => (
+                <div key={index} className="relative">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="font-medium text-gray-900">
+                        {step.title}
+                      </h5>
+                      <p className="text-sm text-gray-600">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                  {index < getAgentWorkflow(selectedAgent).length - 1 && (
+                    <div className="hidden md:block absolute top-4 -right-2 w-4 h-0.5 bg-gray-300"></div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </motion.div>

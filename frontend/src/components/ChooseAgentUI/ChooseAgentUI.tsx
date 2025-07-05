@@ -4,6 +4,7 @@ import AgentCard from "./AgentCard";
 import AgentDeployReview from "../AgentDeployReview/AgentDeployReview";
 import { useAgent } from "@/contexts/agent-context";
 import type { Agent } from "@/types/agent";
+import { wait } from "@/utils/time";
 
 const agents = [
   {
@@ -40,17 +41,18 @@ const ChooseAgentUI = () => {
   const { selectedAgent, setSelectedAgent } = useAgent();
   const [showDeployReview, setShowDeployReview] = useState(false);
 
-  const handleAgentSelect = (agent: Agent) => {
+  const handleAgentSelect = async (agent: Agent) => {
     console.log("Selected agent:", agent);
     setSelectedAgent(agent);
     setShowDeployReview(true);
+    await wait(300);
+    window.scrollTo({ top: 0 });
   };
 
   const handleBackToAgentSelection = () => {
     setShowDeployReview(false);
   };
 
-  // Show AgentDeployReview if an agent is selected and deploy review is shown
   if (selectedAgent && showDeployReview) {
     return (
       <AgentDeployReview

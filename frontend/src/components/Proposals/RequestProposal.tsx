@@ -27,7 +27,6 @@ const RequestProposal = () => {
       status: "creating",
     });
 
-    // Simulate AI proposal creation
     setTimeout(() => {
       setProposalRequest({
         id: requestId,

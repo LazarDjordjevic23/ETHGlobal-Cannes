@@ -2,9 +2,9 @@ import {
   contractReadPublic,
   type AvailableContractName,
 } from "./contract-interactions";
+import { wait } from "./time";
 import { divideOnWei } from "./web3";
 
-// Function to fetch total supply of DAO token
 export const totalSupplyDaoToken = async (): Promise<number> => {
   try {
     const result = await contractReadPublic({
@@ -19,7 +19,6 @@ export const totalSupplyDaoToken = async (): Promise<number> => {
   }
 };
 
-// Function to fetch DAO token symbol
 export const getTokenSymbol = async (
   contractName: AvailableContractName
 ): Promise<string> => {
@@ -36,7 +35,6 @@ export const getTokenSymbol = async (
   }
 };
 
-// Function to fetch DAO token name
 export const getTokenName = async (
   contractName: AvailableContractName
 ): Promise<string> => {
@@ -53,7 +51,6 @@ export const getTokenName = async (
   }
 };
 
-// Function to fetch treasury balance
 export const getTreasuryBalance = async (): Promise<bigint> => {
   try {
     const result = await contractReadPublic({
@@ -68,8 +65,8 @@ export const getTreasuryBalance = async (): Promise<bigint> => {
   }
 };
 
-// Function to fetch multiple DAO metrics at once
 export const getDAOMetrics = async () => {
+  await wait(3000);
   try {
     const [totalSupply, tokenName, tokenSymbol] = await Promise.all([
       totalSupplyDaoToken(),
@@ -88,7 +85,6 @@ export const getDAOMetrics = async () => {
   }
 };
 
-// Function to fetch ETH token total supply
 export const totalSupplyETHToken = async (): Promise<number> => {
   try {
     const result = await contractReadPublic({
@@ -103,8 +99,9 @@ export const totalSupplyETHToken = async (): Promise<number> => {
   }
 };
 
-// Function to fetch multiple ETH token metrics at once
 export const getETHTokenMetrics = async () => {
+  await wait(3000);
+
   try {
     const [totalSupply, tokenName, tokenSymbol] = await Promise.all([
       totalSupplyETHToken(),

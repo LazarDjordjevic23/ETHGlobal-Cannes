@@ -36,7 +36,6 @@ const ProposalDetail = () => {
   >(null);
   const [hasVoted, setHasVoted] = useState(false);
 
-  // Mock data - in real app this would come from your backend/blockchain
   const proposalData: ProposalData = {
     id: proposalId || "1",
     title: "Increase Treasury Allocation for DeFi Yield Farming",
@@ -84,7 +83,6 @@ const ProposalDetail = () => {
   const handleVote = (vote: "for" | "against" | "abstain") => {
     setSelectedVote(vote);
     setHasVoted(true);
-    // In real app, this would submit the vote to the blockchain
   };
 
   const getVotePercentage = (voteCount: number) => {

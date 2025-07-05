@@ -98,15 +98,14 @@ export const getAgentFeatures = (agent: Agent | null) => {
     return defaultFeatures;
   }
 
-  // Features based on agent personality
   switch (agent.id) {
-    case 1: // Distractive Agent 😈
+    case 1:
       return distractiveFeatures;
 
-    case 2: // Communist Agent ☭
+    case 2:
       return communistFeatures;
 
-    case 3: // Capitalist Agent 💵
+    case 3:
       return capitalistFeatures;
 
     default:

@@ -1,13 +1,10 @@
 const formatWithCommas = (number: number, decimals: number) => {
-  // Convert number to fixed string with trailing zeros
   const fixedStr = number.toFixed(decimals);
   const [integerPart, decimalPart] = fixedStr.split(".");
 
-  // Format the integer part with commas
   const integerWithCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   const trimmedDecimal = decimalPart?.replace(/0+$/, "");
 
-  // If there is a remaining decimal part, return it with a dot
   return trimmedDecimal
     ? `${integerWithCommas}.${trimmedDecimal}`
     : integerWithCommas;
@@ -49,13 +46,12 @@ export default function NumberDisplay({
   decimals = 2,
   minDecimalsForSIUnits = 1,
   minSymbolNumber = 1_000_000,
-  noDecimalsAbove = 100_000, // Default: No decimals for numbers >= 100,000
+  noDecimalsAbove = 100_000,
   formatOutputMethod = (num) => num.toString(),
   showAvaliableDecimals = false,
 }: INumberDisplay) {
   const parsedNum = Number.isFinite(+num) ? +num : 0;
 
-  // If number is greater than or equal to `noDecimalsAbove`, set decimals to 0
   const adjustedDecimals =
     parsedNum >= minSymbolNumber
       ? minDecimalsForSIUnits

@@ -60,7 +60,6 @@ const Dashboard = ({
     }
   };
 
-  // Skeleton Loading Component
   const SkeletonLoader = () => (
     <motion.div
       className={`relative bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${className}`}

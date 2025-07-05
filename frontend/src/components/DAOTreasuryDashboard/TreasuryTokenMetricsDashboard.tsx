@@ -8,7 +8,6 @@ const TreasuryTokenMetricsDashboard = () => {
     queryFn: getETHTokenMetrics,
   });
 
-  // Format the total supply with token symbol
   const formatTotalSupply = () => {
     if (!ethTokenData?.totalSupply || !ethTokenData?.tokenSymbol)
       return "Loading...";
@@ -17,7 +16,6 @@ const TreasuryTokenMetricsDashboard = () => {
     )}`;
   };
 
-  // Real + Mock data for Treasury token metrics
   const tokenMetrics: DashboardMetric[] = [
     {
       label: "Token Name",

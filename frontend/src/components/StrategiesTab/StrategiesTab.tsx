@@ -1,19 +1,13 @@
-import { getStrategiesMetrics } from "@/utils/strategy-queries";
+import {
+  getStrategiesMetrics,
+  type FormattedStrategyMetrics,
+} from "@/utils/strategy-queries";
 import { useQuery } from "@tanstack/react-query";
 import Aave from "@/assets/svgs/aave.svg?react";
 import Lido from "@/assets/svgs/lido.svg?react";
 import Compound from "@/assets/svgs/compound.svg?react";
 import NumberDisplay from "../NumberDisplay/NumberDisplay";
 import { useState, useEffect } from "react";
-
-interface FormattedStrategyMetrics {
-  apy: number;
-  tvl: number;
-  utilizationRate: number;
-  riskAdjustedReturns: number;
-  withdrawalLiquidity: number;
-  description?: string;
-}
 
 const StrategiesTab = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -28,10 +22,8 @@ const StrategiesTab = () => {
   });
 
   useEffect(() => {
-    // Trigger animations when component mounts
     setIsVisible(true);
 
-    // Stagger the animations
     const cardTimer = setTimeout(() => setAnimateCards(true), 200);
     const statsTimer = setTimeout(() => setAnimateStats(true), 600);
 
@@ -119,11 +111,13 @@ const StrategiesTab = () => {
           >
             {/* Strategy Header */}
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl transition-transform duration-300 hover:scale-110">
-                  {strategyNames[index].icon}
-                </span>
-              </div>
+              <a href={strategy.link} target="_blank" rel="noopener noreferrer">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl transition-transform duration-300 hover:scale-110">
+                    {strategyNames[index].icon}
+                  </span>
+                </div>
+              </a>
             </div>
 
             {/* Metrics Grid */}
@@ -259,7 +253,7 @@ const StrategiesTab = () => {
               num={
                 strategiesMetrics
                   ? strategiesMetrics.reduce((sum, strategy) => {
-                      return sum + strategy.apy * 100;
+                      return sum + strategy.apy;
                     }, 0) / strategiesMetrics.length
                   : 0
               }
@@ -282,7 +276,7 @@ const StrategiesTab = () => {
               num={
                 strategiesMetrics
                   ? strategiesMetrics.reduce((sum, strategy) => {
-                      return sum + strategy.riskAdjustedReturns * 100;
+                      return sum + strategy.riskAdjustedReturns;
                     }, 0) / strategiesMetrics.length
                   : 0
               }

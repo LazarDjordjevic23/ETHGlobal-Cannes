@@ -4,17 +4,13 @@ import { sepolia } from "viem/chains";
 import { getRpcUrlByChainId } from "@/constants/chains";
 import type { Address, Abi } from "viem";
 
-// Import the deployment files
 import contractAddresses from "../../../contracts/scripts/deployments/develop-contract-addresses.json";
 import contractAbis from "../../../contracts/scripts/deployments/develop-contract-abis.json";
 
-// Define the chain type based on available chains in the deployment files
 export type ChainName = keyof typeof contractAddresses;
 
-// Extract contract names from the addresses file
 export type ContractName = keyof (typeof contractAddresses)[ChainName];
 
-// Define the contracts available in the system
 export const AVAILABLE_CONTRACTS = [
   "DAOToken",
   "Governance",
@@ -28,16 +24,12 @@ export const AVAILABLE_CONTRACTS = [
   "AIAgentEOA",
 ] as const;
 
-// Create a more specific type for contract names
 export type AvailableContractName = (typeof AVAILABLE_CONTRACTS)[number];
 
-// Contract configuration type
 export interface ContractConfig {
   address: Address;
   abi: Abi;
 }
-
-// Function to get contract configuration by name
 export function getContractConfig(
   contractName: AvailableContractName,
   chainName: ChainName = "sepolia"
@@ -63,7 +55,6 @@ export function getContractConfig(
   };
 }
 
-// Function to get contract address by name
 export function getContractAddress(
   contractName: AvailableContractName,
   chainName: ChainName = "sepolia"
@@ -79,7 +70,6 @@ export function getContractAddress(
   return address as Address;
 }
 
-// Function to get contract ABI by name
 export function getContractAbi(
   contractName: AvailableContractName,
   chainName: ChainName = "sepolia"
@@ -95,7 +85,6 @@ export function getContractAbi(
   return abi;
 }
 
-// Function to get all available contracts for a chain
 export function getAllContracts(
   chainName: ChainName = "sepolia"
 ): Record<string, ContractConfig> {
@@ -112,7 +101,6 @@ export function getAllContracts(
   return contracts;
 }
 
-// Function to check if a contract exists
 export function contractExists(
   contractName: string,
   chainName: ChainName = "sepolia"
@@ -124,7 +112,6 @@ export function contractExists(
   );
 }
 
-// Utility function to get contract instances ready for wagmi hooks
 export function getContractForWagmi(
   contractName: AvailableContractName,
   chainName: ChainName = "sepolia"
@@ -134,11 +121,10 @@ export function getContractForWagmi(
   return {
     address: config.address,
     abi: config.abi,
-    chainId: 11155111, // Sepolia chain ID
+    chainId: 11155111,
   };
 }
 
-// Export contract addresses and ABIs for direct access if needed
 export { contractAddresses, contractAbis };
 
 export const getChainById = (chainId: number) => {

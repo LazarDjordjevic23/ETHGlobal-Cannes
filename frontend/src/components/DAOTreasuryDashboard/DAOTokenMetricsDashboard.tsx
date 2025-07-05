@@ -8,7 +8,6 @@ const DAOTokenMetricsDashboard = () => {
     queryFn: getDAOMetrics,
   });
 
-  // Format the total supply with token symbol
   const formatTotalSupply = () => {
     if (!daoData?.totalSupply || !daoData?.tokenSymbol) return "Loading...";
     return `${daoData.totalSupply.toLocaleString()} ${String(
