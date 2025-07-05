@@ -1,35 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
-import Dashboard, { type DashboardMetric } from "./Dashboard";
-import { getETHTokenMetrics } from "@/utils/dao-queries";
+import Dashboard, { type DashboardMetric } from "../Dashboard/Dashboard";
+import { getDAOMetrics } from "@/utils/dao-queries";
 
-const TreasuryTokenMetricsDashboard = () => {
-  const { data: ethTokenData, isLoading } = useQuery({
-    queryKey: ["ethTokenMetrics"],
-    queryFn: getETHTokenMetrics,
+const DAOTokenMetricsDashboard = () => {
+  const { data: daoData, isLoading } = useQuery({
+    queryKey: ["daoMetrics"],
+    queryFn: getDAOMetrics,
   });
 
   // Format the total supply with token symbol
   const formatTotalSupply = () => {
-    if (!ethTokenData?.totalSupply || !ethTokenData?.tokenSymbol)
-      return "Loading...";
-    return `${ethTokenData.totalSupply.toLocaleString()} ${String(
-      ethTokenData.tokenSymbol
+    if (!daoData?.totalSupply || !daoData?.tokenSymbol) return "Loading...";
+    return `${daoData.totalSupply.toLocaleString()} ${String(
+      daoData.tokenSymbol
     )}`;
   };
 
-  // Real + Mock data for Treasury token metrics
   const tokenMetrics: DashboardMetric[] = [
     {
       label: "Token Name",
-      value: ethTokenData?.tokenName || "Loading...",
+      value: daoData?.tokenName || "Loading...",
       change: undefined,
       icon: <span className="text-blue-600">🏷️</span>,
     },
     {
       label: "Token Symbol",
-      value: ethTokenData?.tokenSymbol
-        ? String(ethTokenData.tokenSymbol)
-        : "Loading...",
+      value: daoData?.tokenSymbol ? String(daoData.tokenSymbol) : "Loading...",
       change: undefined,
       icon: <span className="text-purple-600">💎</span>,
     },
@@ -44,33 +40,31 @@ const TreasuryTokenMetricsDashboard = () => {
     },
     {
       label: "Current Token Price",
-      value: "$1.00",
+      value: "$0.85",
       change: {
-        value: "+0.1%",
+        value: "+2.1%",
         trend: "up",
       },
       icon: <span className="text-green-600">📈</span>,
     },
     {
       label: "Market Capitalization",
-      value: ethTokenData?.totalSupply
-        ? `$${(ethTokenData.totalSupply * 1.0).toLocaleString()}`
+      value: daoData?.totalSupply
+        ? `$${(daoData.totalSupply * 0.85).toLocaleString()}`
         : "Loading...",
       change: {
-        value: "+0.1%",
+        value: "+2.1%",
         trend: "up",
       },
       icon: <span className="text-purple-600">💵</span>,
     },
     {
       label: "24h Volume",
-      value: ethTokenData?.totalSupply
-        ? `$${Math.round(
-            ethTokenData.totalSupply * 1.0 * 0.08
-          ).toLocaleString()}`
+      value: daoData?.totalSupply
+        ? `$${Math.round(daoData.totalSupply * 0.85 * 0.15).toLocaleString()}`
         : "Loading...",
       change: {
-        value: "+5.2%",
+        value: "+8.3%",
         trend: "up",
       },
       icon: <span className="text-orange-600">📊</span>,
@@ -79,8 +73,8 @@ const TreasuryTokenMetricsDashboard = () => {
 
   return (
     <Dashboard
-      title="Treasury Token Metrics"
-      description="Real-time metrics and analysis for treasury ETH tokens"
+      title="DAO Token Metrics"
+      description="Real-time metrics and distribution analysis for DAO governance tokens"
       metrics={tokenMetrics}
       loading={isLoading}
       className="mb-8"
@@ -88,4 +82,4 @@ const TreasuryTokenMetricsDashboard = () => {
   );
 };
 
-export default TreasuryTokenMetricsDashboard;
+export default DAOTokenMetricsDashboard;
