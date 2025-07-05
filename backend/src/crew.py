@@ -3,7 +3,7 @@ CrewAI implementation for strategy analysis and proposal creation.
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional, Dict, Any
 from web3 import Web3
 from crewai import Agent, Task, Crew, Process
@@ -15,6 +15,7 @@ from .services.treasury import TreasuryService
 from .services.strategy import StrategyService
 from .services.governance import GovernanceService
 from .utils import create_proposal_parameters
+from .tools import ProposalTool
 
 # Constants
 SEPOLIA_EXPLORER_URL = "https://sepolia.etherscan.io/tx/"
@@ -42,6 +43,17 @@ class ProposalCrew:
         
         # Get LLM
         self.llm = get_llm()
+        
+        # Create proposal tool if governance service is available
+        self.proposal_tool = None
+        if self.governance_service:
+            self.proposal_tool = ProposalTool(
+                governance_service=self.governance_service,
+                treasury_address=self.treasury_address,
+                strategy_address=self.strategy_address,
+                governance_address=self.governance_address,
+                eth_token_address=self.eth_token_address
+            )
     
     def _create_agents(self) -> tuple[Agent, Agent, Agent]:
         """Create the three agents needed for the crew"""
@@ -80,7 +92,7 @@ class ProposalCrew:
             verbose=True,
             allow_delegation=False,
             llm=self.llm,
-            tools=[FileReadTool()]
+            tools=[FileReadTool(), self.proposal_tool] if self.proposal_tool else [FileReadTool()]
         )
         
         return treasury_agent, strategy_agent, proposal_agent
@@ -140,31 +152,33 @@ class ProposalCrew:
         
         proposal_task = Task(
             description=f"""
-            Create a governance proposal based on the treasury analysis and strategy recommendation.
+            Create and submit a governance proposal based on the treasury analysis and strategy recommendation.
             
-            The proposal should call the Treasury contract's execute function to execute the chosen strategy.
+            Based on the treasury analysis and strategy evaluation:
+            1. Choose the best strategy (1, 2, or 3) based on the analysis
+            2. Create a detailed proposal explaining the rationale
+            3. Use the proposal_tool to submit the proposal to the blockchain
             
-            Use the treasury analysis and strategy evaluation to create a proposal that:
-            1. Clearly explains the rationale for the chosen strategy
-            2. Provides expected outcomes and risks
-            3. Includes all necessary technical details for execution
-            
-            The proposal should be in JSON format with the following structure:
+            You must use the proposal_tool with a JSON string containing:
             {{
-                "proposal_title": "title",
+                "proposal_title": "title for the proposal",
                 "proposal_description": "detailed description for governance proposal",
                 "strategy_id": "chosen strategy id (1, 2, or 3)",
                 "expected_profit": "estimated profit in USD",
                 "risk_assessment": "risk analysis",
                 "execution_details": "technical details for execution",
-                "reasoning": "detailed explanation of why this strategy is best"
+                "reasoning": "DETAILED explanation including: treasury health analysis, market conditions, strategy comparison, risk assessment, and why this specific strategy was selected over alternatives"
             }}
             
-            IMPORTANT: The governance proposal will call Treasury.execute() which will then call the strategy contract.
+            IMPORTANT: 
+            - The reasoning field must be comprehensive and explain the decision-making process
+            - Include specific details about treasury health, market conditions, and strategy benefits
+            - You MUST use the proposal_tool to actually submit the proposal. Do not just return JSON.
             """,
             agent=proposal_agent,
             context=[treasury_task, strategy_task],
-            expected_output="JSON governance proposal"
+            tools=[self.proposal_tool] if self.proposal_tool else None,
+            expected_output="Result of proposal submission with transaction hash or error message"
         )
         
         return [treasury_task, strategy_task, proposal_task]
@@ -218,79 +232,158 @@ class ProposalCrew:
             print("🚀 Starting AI Crew Analysis...")
             result = crew.kickoff()
             
-            # Parse the results
+            # Parse the results - the tool should have handled the proposal creation
             result_str = str(result)
-            json_match = result_str.find('{')
-            if json_match != -1:
-                proposal_data = json.loads(result_str[json_match:])
+            
+            # Extract detailed task outputs from the crew result
+            # The crew result contains outputs from all three agents
+            tasks_outputs = []
+            if hasattr(result, 'tasks_output') and result.tasks_output:
+                for task_output in result.tasks_output:
+                    tasks_outputs.append(str(task_output.raw))
+            
+            # Extract transaction hash from the result if present
+            tx_hash = None
+            if "SUCCESS: Proposal submitted with transaction hash:" in result_str:
+                # Extract transaction hash from the success message
+                import re
+                hash_match = re.search(r'0x[a-fA-F0-9]{64}', result_str)
+                if hash_match:
+                    tx_hash = hash_match.group()
+                    print(f"✅ Proposal submitted successfully!")
+                    print(f"📊 Transaction Hash: {tx_hash}")
+                    print(f"🔍 View on Etherscan: {SEPOLIA_EXPLORER_URL}{tx_hash}")
+            elif "ERROR:" in result_str:
+                print("❌ Failed to submit proposal:")
+                print(result_str)
+            
+            # Extract detailed reasoning from the AI analysis
+            reasoning = "Strategy selection based on AI analysis"  # Default fallback
+            recommended_strategy_id = 1  # Default fallback
+            
+            import re
+            
+            # First, extract strategy ID from any of the outputs
+            all_content = result_str + " " + " ".join(tasks_outputs)
+            strategy_match = re.search(r'strategy\s*(\d+)', all_content.lower())
+            if strategy_match:
+                recommended_strategy_id = int(strategy_match.group(1))
+                if recommended_strategy_id not in [1, 2, 3]:
+                    recommended_strategy_id = 1
+            
+            # Extract reasoning from individual task outputs (treasury and strategy analysis)
+            treasury_analysis = ""
+            strategy_analysis = ""
+            
+            if len(tasks_outputs) >= 2:
+                # First task is treasury analysis
+                treasury_output = tasks_outputs[0] if tasks_outputs else ""
                 
-                # Get the recommended strategy
-                recommended_strategy_id = int(proposal_data.get("strategy_id", 1))
-                recommended_strategy = next(s for s in strategies if s.strategy_id == recommended_strategy_id)
+                # Extract treasury insights
+                treasury_patterns = [
+                    r'"treasury_health"\s*:\s*"([^"]+)"',
+                    r'"risk_tolerance"\s*:\s*"([^"]+)"', 
+                    r'"market_conditions"\s*:\s*"([^"]+)"',
+                    r'"analysis_summary"\s*:\s*"([^"]+)"'
+                ]
                 
-                # Create proposal parameters
-                targets, values, calldatas, description = create_proposal_parameters(
-                    self.treasury_address,
-                    self.strategy_address,
-                    self.eth_token_address
-                )
+                treasury_insights = []
+                for pattern in treasury_patterns:
+                    match = re.search(pattern, treasury_output)
+                    if match:
+                        treasury_insights.append(match.group(1))
                 
-                # Create the governance proposal
-                proposal = GovernanceProposal(
-                    description=proposal_data.get("proposal_description", description),
-                    targets=targets,
-                    values=values,
-                    calldatas=calldatas,
-                    reasoning=proposal_data.get("reasoning", f"Strategy {recommended_strategy_id} selected by AI analysis")
-                )
+                if treasury_insights:
+                    treasury_analysis = f"Treasury health: {treasury_insights[0] if treasury_insights else 'assessed'}"
+                    if len(treasury_insights) > 1:
+                        treasury_analysis += f", risk tolerance: {treasury_insights[1]}"
+                    if len(treasury_insights) > 2:
+                        treasury_analysis += f", market conditions: {treasury_insights[2]}"
                 
-                # Submit proposal if governance service is available
-                tx_hash = None
-                if self.governance_service:
-                    print("\n📝 GOVERNANCE: Submitting proposal to blockchain...")
-                    tx_hash = self.governance_service.create_proposal(self.governance_address, proposal)
-                    if tx_hash:
-                        print(f"✅ Proposal submitted successfully!")
-                        print(f"📊 Transaction Hash: {tx_hash}")
-                        print(f"🔍 View on Etherscan: {SEPOLIA_EXPLORER_URL}{tx_hash}")
+                # Second task is strategy analysis
+                strategy_output = tasks_outputs[1] if len(tasks_outputs) > 1 else ""
+                
+                # Extract strategy insights
+                strategy_patterns = [
+                    r'"recommended_strategy"\s*:\s*"([^"]+)"',
+                    r'"reasoning"\s*:\s*"([^"]+)"',
+                    r'"risk_level"\s*:\s*"([^"]+)"',
+                    r'"expected_apy"\s*:\s*"([^"]+)"'
+                ]
+                
+                strategy_insights = []
+                for pattern in strategy_patterns:
+                    match = re.search(pattern, strategy_output)
+                    if match:
+                        strategy_insights.append(match.group(1))
+                
+                if strategy_insights:
+                    if len(strategy_insights) > 1:
+                        strategy_analysis = strategy_insights[1]  # Use the reasoning field
                     else:
-                        print("❌ Failed to submit proposal to blockchain")
-                else:
-                    print("⚠️ No governance service available - skipping blockchain submission")
+                        strategy_analysis = f"Strategy {strategy_insights[0]} recommended"
+                    
+                    if len(strategy_insights) > 2:
+                        strategy_analysis += f" with {strategy_insights[2]} risk level"
+            
+            # Combine treasury and strategy analysis for comprehensive reasoning
+            reasoning_parts = []
+            if treasury_analysis:
+                reasoning_parts.append(treasury_analysis)
+            if strategy_analysis and len(strategy_analysis) > 30:
+                reasoning_parts.append(strategy_analysis)
+            
+            if reasoning_parts:
+                reasoning = ". ".join(reasoning_parts)
+                if not reasoning.endswith('.'):
+                    reasoning += '.'
+            
+            # Fallback: extract any substantial reasoning from the outputs
+            if len(reasoning) < 80:
+                # Look for substantial sentences that explain the decision
+                all_outputs_text = " ".join(tasks_outputs)
                 
-                # Create the response
-                response = {
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "tx_hash": tx_hash,
-                    "tx_url": f"{SEPOLIA_EXPLORER_URL}{tx_hash}" if tx_hash else None,
-                    "strategy_id": recommended_strategy_id,
-                    "expected_apy": recommended_strategy.apy / 100,
-                    "reasoning": proposal.reasoning,
-                    "treasury_data": {
-                        "eth_balance": str(treasury_data.eth_balance),
-                        "eth_token_balance": str(treasury_data.eth_token_balance),
-                        "total_value_usd": treasury_data.total_value_usd
-                    },
-                    "strategy_metrics": {
-                        "apy": str(recommended_strategy.apy),
-                        "tvl": str(recommended_strategy.tvl),
-                        "risk_adjusted_returns": str(recommended_strategy.risk_adjusted_returns),
-                        "withdrawal_liquidity": str(recommended_strategy.withdrawal_liquidity)
-                    },
-                    "ai_analysis": {
-                        "final_output": str(result),
-                        "strategy_recommendation": {
-                            "strategy_id": recommended_strategy_id,
-                            "reasoning": proposal.reasoning,
-                            "expected_profit": str(treasury_data.total_value_usd)
-                        }
+                # Extract sentences that contain key reasoning words
+                reasoning_sentences = re.findall(
+                    r'[A-Z][^\.]*(?:because|due to|given|selected|recommended|chosen|analysis|assessment)[^\.]*\.',
+                    all_outputs_text
+                )
+                
+                # Filter out tool-related sentences
+                filtered_sentences = [
+                    sentence.strip() for sentence in reasoning_sentences
+                    if not any(word in sentence.lower() for word in ['tool', 'error', 'validation', 'input', 'transaction', 'hash'])
+                    and len(sentence) > 40
+                ]
+                
+                if filtered_sentences:
+                    reasoning = " ".join(filtered_sentences[:3])  # Take first 3 relevant sentences
+                        
+            # Get the recommended strategy for response
+            recommended_strategy = next((s for s in strategies if s.strategy_id == recommended_strategy_id), strategies[0])
+            
+            # Calculate expected profit based on token balance and strategy APY
+            eth_token_balance_in_tokens = treasury_data.eth_token_balance / 1e18
+            expected_annual_profit = eth_token_balance_in_tokens * (recommended_strategy.apy / 10000)  # APY is in basis points
+            expected_profit_usd = expected_annual_profit * 2000  # Mock ETH price for calculation
+            
+            # Create the response
+            response = {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "tx_url": f"{SEPOLIA_EXPLORER_URL}{tx_hash}" if tx_hash else None,
+                "strategy_id": recommended_strategy_id,
+                "reasoning": reasoning,
+                "ai_analysis": {
+                    "final_output": str(result),
+                    "strategy_recommendation": {
+                        "strategy_id": recommended_strategy_id,
+                        "reasoning": reasoning,
+                        "expected_profit": f"${expected_profit_usd:,.2f}"
                     }
                 }
-                
-                return response
-                
-            else:
-                raise ValueError("Could not parse AI analysis results")
+            }
+            
+            return response
                 
         except Exception as e:
             print(f"❌ Error in crew analysis: {str(e)}")

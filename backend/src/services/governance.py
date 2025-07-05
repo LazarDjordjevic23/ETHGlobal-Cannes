@@ -40,7 +40,10 @@ class GovernanceService:
             print(f"💸 Estimated Cost: {estimated_cost / 1e18:.6f} ETH")
             
             if balance < estimated_cost:
+                shortage = estimated_cost - balance
                 print(f"❌ Insufficient funds: Need {estimated_cost / 1e18:.6f} ETH, have {balance / 1e18:.6f} ETH")
+                print(f"💰 Short by: {shortage / 1e18:.6f} ETH")
+                print(f"🔗 Please send ETH to: {self.account.address}")
                 return None
             
             # Build transaction
