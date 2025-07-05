@@ -1,20 +1,13 @@
 import { motion } from "framer-motion";
-
-interface Agent {
-  id: number;
-  name: string;
-  description: string;
-  status: string;
-  strategy: string;
-  risk: string;
-}
+import type { Agent } from "@/types/agent";
 
 interface AgentCardProps {
   agent: Agent;
   onSelect?: (agent: Agent) => void;
+  isSelected?: boolean;
 }
 
-const AgentCard = ({ agent, onSelect }: AgentCardProps) => {
+const AgentCard = ({ agent, onSelect, isSelected = false }: AgentCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "active":
@@ -54,7 +47,11 @@ const AgentCard = ({ agent, onSelect }: AgentCardProps) => {
 
   return (
     <motion.div
-      className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-lg cursor-pointer group"
+      className={`bg-white rounded-lg border cursor-pointer group ${
+        isSelected
+          ? "border-blue-500 shadow-lg ring-2 ring-blue-200"
+          : "border-gray-200 hover:border-blue-300 hover:shadow-lg"
+      }`}
       onClick={handleClick}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -137,11 +134,15 @@ const AgentCard = ({ agent, onSelect }: AgentCardProps) => {
 
         {/* Action Button */}
         <motion.button
-          className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 group-hover:bg-blue-600"
+          className={`w-full font-medium py-2.5 px-4 rounded-lg transition-all duration-200 ${
+            isSelected
+              ? "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-gray-900 hover:bg-gray-800 text-white group-hover:bg-blue-600"
+          }`}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Select Agent
+          {isSelected ? "✓ Selected" : "Select Agent"}
         </motion.button>
       </div>
     </motion.div>

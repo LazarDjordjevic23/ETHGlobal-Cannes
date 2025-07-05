@@ -2,15 +2,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import AgentCard from "./AgentCard";
 import AgentDeployReview from "../AgentDeployReview/AgentDeployReview";
-
-interface Agent {
-  id: number;
-  name: string;
-  description: string;
-  status: string;
-  strategy: string;
-  risk: string;
-}
+import { useAgent } from "@/contexts/agent-context";
+import type { Agent } from "@/types/agent";
 
 const agents = [
   {
@@ -43,19 +36,21 @@ const agents = [
 ];
 
 const ChooseAgentUI = () => {
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const { selectedAgent, setSelectedAgent } = useAgent();
+  const [showDeployReview, setShowDeployReview] = useState(false);
 
   const handleAgentSelect = (agent: Agent) => {
     console.log("Selected agent:", agent);
     setSelectedAgent(agent);
+    setShowDeployReview(true);
   };
 
   const handleBackToAgentSelection = () => {
-    setSelectedAgent(null);
+    setShowDeployReview(false);
   };
 
-  // Show AgentDeployReview if an agent is selected
-  if (selectedAgent) {
+  // Show AgentDeployReview if an agent is selected and deploy review is shown
+  if (selectedAgent && showDeployReview) {
     return (
       <AgentDeployReview
         selectedAgent={selectedAgent}
@@ -83,9 +78,41 @@ const ChooseAgentUI = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Choose Your Agent
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 mb-4">
             Select an AI agent to help you navigate the decentralized ecosystem
           </p>
+
+          {/* Current Selection Display */}
+          {selectedAgent && (
+            <motion.div
+              className="inline-flex items-center gap-3 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl px-6 py-3"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">
+                  {selectedAgent.name.charAt(0)}
+                </span>
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-gray-900">
+                  Currently Selected: {selectedAgent.name}
+                </div>
+                <div className="text-xs text-gray-600">
+                  {selectedAgent.status} • {selectedAgent.strategy}
+                </div>
+              </div>
+              <motion.button
+                onClick={() => setSelectedAgent(null)}
+                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                ✕
+              </motion.button>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Stats Bar */}
@@ -139,7 +166,11 @@ const ChooseAgentUI = () => {
                   stiffness: 100,
                 }}
               >
-                <AgentCard agent={agent} onSelect={handleAgentSelect} />
+                <AgentCard
+                  agent={agent}
+                  onSelect={handleAgentSelect}
+                  isSelected={selectedAgent?.id === agent.id}
+                />
               </motion.div>
             ))}
           </motion.div>

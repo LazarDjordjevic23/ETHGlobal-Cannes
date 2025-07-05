@@ -1,245 +1,314 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useAgent } from "@/contexts/agent-context";
+import { getAgentFeatures } from "@/utils/agent-features";
 
-interface Message {
+interface ProposalRequest {
   id: string;
-  type: "user" | "agent";
-  content: string;
-  timestamp: Date;
+  status: "idle" | "creating" | "completed";
   proposalLink?: string;
+  timestamp?: Date;
 }
 
 const RequestProposal = () => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      type: "agent",
-      content:
-        "Hello! I'm your AI governance agent. I can help you create proposals for your DAO. What would you like to propose?",
-      timestamp: new Date(),
-    },
-  ]);
-  const [inputValue, setInputValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { selectedAgent } = useAgent();
+  const [proposalRequest, setProposalRequest] = useState<ProposalRequest>({
+    id: "",
+    status: "idle",
+  });
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+  const handleRequestProposal = async () => {
+    const requestId = Date.now().toString();
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: "user",
-      content: inputValue,
-      timestamp: new Date(),
-    };
+    setProposalRequest({
+      id: requestId,
+      status: "creating",
+    });
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-    setIsLoading(true);
-
-    // Simulate AI response
+    // Simulate AI proposal creation
     setTimeout(() => {
-      const agentResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        type: "agent",
-        content:
-          "I've analyzed your request and created a comprehensive proposal. Based on your input, I've drafted a proposal that addresses the key points while considering the DAO's current treasury status, governance structure, and community needs.",
+      setProposalRequest({
+        id: requestId,
+        status: "completed",
+        proposalLink: `proposal-${requestId}`,
         timestamp: new Date(),
-        proposalLink: `proposal-${Date.now()}`,
-      };
-
-      setMessages((prev) => [...prev, agentResponse]);
-      setIsLoading(false);
-    }, 2000);
+      });
+    }, 3000);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  const handleViewProposal = () => {
+    if (proposalRequest.proposalLink) {
+      navigate(`/proposal/${proposalRequest.proposalLink}`);
     }
   };
 
-  const handleViewProposal = (proposalId: string) => {
-    // Navigate to the proposal detail page
-    navigate(`/proposal/${proposalId}`);
+  const handleCreateAnother = () => {
+    setProposalRequest({
+      id: "",
+      status: "idle",
+    });
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-2xl mx-auto space-y-8">
       {/* Header */}
       <motion.div
+        className="text-center"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6 }}
       >
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Request Proposal
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          AI Proposal Assistant
         </h2>
-        <p className="text-gray-600">
-          Ask your AI agent to create a proposal for your DAO
+        <p className="text-lg text-gray-600 mb-4">
+          Let our AI agent analyze your DAO's current state and create
+          intelligent proposals
         </p>
+
+        {/* Selected Agent Display */}
+        {selectedAgent && (
+          <motion.div
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl px-6 py-3"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">
+                {selectedAgent.name.charAt(0)}
+              </span>
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-semibold text-gray-900">
+                Selected Agent: {selectedAgent.name}
+              </div>
+              <div className="text-xs text-gray-600">
+                {selectedAgent.status} • {selectedAgent.risk} Risk
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {!selectedAgent && (
+          <motion.div
+            className="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            <span className="text-yellow-600">⚠️</span>
+            <span className="text-sm text-yellow-800">
+              No agent selected. Please choose an agent first.
+            </span>
+          </motion.div>
+        )}
       </motion.div>
 
-      {/* Chat Container */}
+      {/* Main Content Card */}
       <motion.div
-        className="bg-white rounded-lg border border-gray-200 shadow-sm h-96 flex flex-col"
+        className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
       >
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message, index) => (
+        {/* Status Display */}
+        <div className="p-8">
+          {proposalRequest.status === "idle" && (
             <motion.div
-              key={message.id}
-              className={`flex ${
-                message.type === "user" ? "justify-end" : "justify-start"
-              }`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.3 }}
-            >
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  message.type === "user"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-900"
-                }`}
-              >
-                {message.type === "agent" && (
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">🤖</span>
-                    <span className="text-xs font-medium text-gray-600">
-                      AI Agent
-                    </span>
-                  </div>
-                )}
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-
-                {message.proposalLink && (
-                  <motion.button
-                    className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleViewProposal(message.proposalLink!)}
-                  >
-                    View Created Proposal →
-                  </motion.button>
-                )}
-
-                <div className="text-xs mt-1 opacity-75">
-                  {message.timestamp.toLocaleTimeString()}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-
-          {/* Loading indicator */}
-          {isLoading && (
-            <motion.div
-              className="flex justify-start"
+              className="text-center space-y-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
             >
-              <div className="bg-gray-100 text-gray-900 max-w-xs lg:max-w-md px-4 py-2 rounded-lg">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">🤖</span>
-                  <span className="text-xs font-medium text-gray-600">
-                    AI Agent
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
-                  </div>
-                  <span className="text-sm text-gray-600">
-                    Analyzing your request...
-                  </span>
+              {/* AI Agent Icon */}
+              <div className="mx-auto w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-4xl text-white">🤖</span>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  Ready to Create Your Proposal
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {selectedAgent ? (
+                    <>
+                      <strong>{selectedAgent.name}</strong> will analyze your
+                      DAO's treasury, governance structure, and community needs
+                      to create a comprehensive proposal using its{" "}
+                      <strong>{selectedAgent.strategy}</strong> strategy.
+                    </>
+                  ) : (
+                    "Please select an AI agent first. The agent will analyze your DAO's treasury, governance structure, and community needs to create a comprehensive proposal."
+                  )}
+                </p>
+              </div>
+
+              {/* Main Action Button */}
+              <motion.button
+                onClick={handleRequestProposal}
+                disabled={!selectedAgent}
+                className={`font-semibold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 transform ${
+                  selectedAgent
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+                whileHover={selectedAgent ? { scale: 1.05 } : {}}
+                whileTap={selectedAgent ? { scale: 0.95 } : {}}
+              >
+                <span className="flex items-center gap-3">
+                  <span className="text-xl">{selectedAgent ? "✨" : "🚫"}</span>
+                  {selectedAgent
+                    ? `Ask ${selectedAgent.name} to Create Proposal`
+                    : "Select an Agent First"}
+                  <span className="text-xl">{selectedAgent ? "✨" : "🚫"}</span>
+                </span>
+              </motion.button>
+            </motion.div>
+          )}
+
+          {proposalRequest.status === "creating" && (
+            <motion.div
+              className="text-center space-y-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              {/* Animated Loading Icon */}
+              <div className="mx-auto w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <motion.span
+                  className="text-4xl text-white"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                >
+                  ⚡
+                </motion.span>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  {selectedAgent?.name} is Creating Your Proposal
+                </h3>
+                <p className="text-gray-600">
+                  {selectedAgent?.name} is analyzing your DAO's data using its{" "}
+                  <strong>{selectedAgent?.strategy}</strong> strategy and
+                  crafting a comprehensive proposal...
+                </p>
+
+                {/* Progress Steps */}
+                <div className="space-y-3 mt-6">
+                  {[
+                    "Analyzing treasury data",
+                    "Reviewing governance structure",
+                    "Assessing community needs",
+                    "Drafting proposal content",
+                  ].map((step, index) => (
+                    <motion.div
+                      key={index}
+                      className="flex items-center gap-3 text-sm text-gray-600"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.5, duration: 0.3 }}
+                    >
+                      <motion.div
+                        className="w-2 h-2 bg-blue-500 rounded-full"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          delay: index * 0.2,
+                        }}
+                      />
+                      {step}
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             </motion.div>
           )}
-        </div>
 
-        {/* Input Area */}
-        <div className="border-t border-gray-200 p-4">
-          <div className="flex gap-2">
-            <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Describe what you'd like to propose to your DAO..."
-              className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows={2}
-              disabled={isLoading}
-            />
-            <motion.button
-              onClick={handleSendMessage}
-              disabled={!inputValue.trim() || isLoading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+          {proposalRequest.status === "completed" && (
+            <motion.div
+              className="text-center space-y-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
             >
-              Send
-            </motion.button>
-          </div>
+              {/* Success Icon */}
+              <div className="mx-auto w-24 h-24 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-4xl text-white">✅</span>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  Proposal Created Successfully!
+                </h3>
+                <p className="text-gray-600">
+                  {selectedAgent?.name} has analyzed your DAO's current state
+                  using its <strong>{selectedAgent?.strategy}</strong> strategy
+                  and created a comprehensive proposal tailored to your
+                  organization's needs.
+                </p>
+
+                {proposalRequest.timestamp && (
+                  <p className="text-sm text-gray-500">
+                    Created at {proposalRequest.timestamp.toLocaleString()}
+                  </p>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 justify-center">
+                <motion.button
+                  onClick={handleViewProposal}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  View Proposal →
+                </motion.button>
+
+                <motion.button
+                  onClick={handleCreateAnother}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Create Another
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
         </div>
       </motion.div>
 
-      {/* Example Prompts */}
+      {/* Features Section */}
       <motion.div
-        className="bg-gray-50 rounded-lg p-6 border border-gray-200"
+        className="bg-gray-50 rounded-2xl p-8 border border-gray-200"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
+        transition={{ delay: 0.4, duration: 0.6 }}
       >
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Example Requests
+        <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+          {selectedAgent
+            ? `What ${selectedAgent.name} Considers`
+            : "What Our AI Agent Considers"}
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            {
-              title: "Treasury Optimization",
-              description:
-                "Suggest ways to optimize our treasury for better yields",
-              prompt:
-                "Our treasury has $2.4M sitting idle. Can you propose a strategy to optimize yield while maintaining security?",
-            },
-            {
-              title: "Community Incentives",
-              description: "Create incentive programs for active members",
-              prompt:
-                "We need to increase governance participation. Can you propose an incentive program for active voters?",
-            },
-            {
-              title: "Protocol Upgrades",
-              description: "Propose technical improvements to our protocol",
-              prompt:
-                "Our gas costs are too high. Can you propose a multi-chain deployment strategy?",
-            },
-            {
-              title: "Partnership Proposals",
-              description: "Suggest strategic partnerships",
-              prompt:
-                "We should partner with other DAOs. Can you propose a collaboration framework?",
-            },
-          ].map((example, index) => (
-            <motion.button
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {getAgentFeatures(selectedAgent).map((feature, index) => (
+            <motion.div
               key={index}
-              onClick={() => setInputValue(example.prompt)}
-              className="text-left p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className="text-center space-y-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
             >
-              <h4 className="font-medium text-gray-900 mb-1">
-                {example.title}
-              </h4>
-              <p className="text-sm text-gray-600">{example.description}</p>
-            </motion.button>
+              <div className="text-3xl mb-2">{feature.icon}</div>
+              <h4 className="font-semibold text-gray-900">{feature.title}</h4>
+              <p className="text-sm text-gray-600">{feature.description}</p>
+            </motion.div>
           ))}
         </div>
       </motion.div>
