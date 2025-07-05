@@ -20,7 +20,7 @@ class ProposalTool(BaseTool):
     Input should be a JSON string with the following structure:
     {
         "proposal_title": "title",
-        "proposal_description": "detailed description",
+        "proposal_description": "Investing strategy",
         "strategy_id": "chosen strategy id (1, 2, or 3)",
         "expected_profit": "estimated profit in USD",
         "risk_assessment": "risk analysis",
@@ -53,7 +53,7 @@ class ProposalTool(BaseTool):
                 input_json = {"reasoning": str(tool_input)}
             
             # Create proposal parameters
-            targets, values, calldatas, default_description = create_proposal_parameters(
+            targets, values, calldatas, _ = create_proposal_parameters(
                 self.treasury_address,
                 self.strategy_address,
                 self.eth_token_address
@@ -64,7 +64,7 @@ class ProposalTool(BaseTool):
             
             # Create the proposal object
             proposal = GovernanceProposal(
-                description=input_json.get("proposal_description", default_description),
+                description="Investing strategy 1",
                 targets=targets,
                 values=values,
                 calldatas=calldatas,

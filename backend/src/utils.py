@@ -44,7 +44,7 @@ def create_proposal_parameters(treasury_address: str, strategy_address: str, eth
     treasury_call_data = encode_treasury_execute_call(
         strategy_address,
         eth_token_address,
-        Web3.to_wei(1000, 'ether')
+        Web3.to_wei(1, 'ether')
     )
     
     # Proposal parameters
@@ -72,7 +72,7 @@ def create_proposal_parameters(treasury_address: str, strategy_address: str, eth
     - Amount: {amount} tokens
     """.format(
         token_address=eth_token_address,
-        amount=Web3.from_wei(Web3.to_wei(1000, 'ether'), 'ether')
+        amount=Web3.from_wei(Web3.to_wei(1, 'ether'), 'ether')
     )
     
     return targets, values, calldatas, formatted_description 
