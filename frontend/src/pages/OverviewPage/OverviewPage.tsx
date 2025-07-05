@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
-import TreasuryDashboard from "../../components/Dashboard/TreasuryDashboard";
-import DAOTokenMetricsDashboard from "../../components/Dashboard/DAOTokenMetricsDashboard";
 import { Tabs, type TabItem } from "../../components/Tabs";
+import DAOTreasuryDashboard from "@/components/Dashboard/DAOTreasuryDashboard";
 
 const OverviewPage = () => {
   const tabs: TabItem[] = [
@@ -9,14 +8,14 @@ const OverviewPage = () => {
       id: "dao",
       label: "DAO",
       icon: <span className="text-blue-600">🏛️</span>,
-      content: <DAOTokenMetricsDashboard />,
+      content: <DAOTreasuryDashboard />,
     },
-    {
-      id: "treasury",
-      label: "Treasury",
-      icon: <span className="text-green-600">💰</span>,
-      content: <TreasuryDashboard />,
-    },
+    // {
+    //   id: "treasury",
+    //   label: "Treasury",
+    //   icon: <span className="text-green-600">💰</span>,
+    //   content: <TreasuryDashboard />,
+    // },
 
     {
       id: "agents",

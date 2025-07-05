@@ -39,7 +39,7 @@ const ProposalsList = () => {
       id: "2",
       title: "Implement Multi-Chain Treasury Management",
       description:
-        "Deploy treasury management across Ethereum, Arbitrum, and Polygon to optimize gas costs and maximize yield opportunities.",
+        "Deploy treasury management across Ethereum, Sepolia, and other networks to optimize gas costs and maximize yield opportunities.",
       status: "pending",
       createdBy: "AI Agent",
       createdAt: "2024-01-14",

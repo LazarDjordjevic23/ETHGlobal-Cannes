@@ -1,8 +1,8 @@
 export { default as Dashboard } from "./Dashboard";
+export { default as DAOTokenMetricsDashboard } from "./DAOTokenMetricsDashboard";
+export { default as TreasuryTokenMetricsDashboard } from "./TreasuryTokenMetricsDashboard";
 export type {
-  DashboardProps,
   DashboardMetric,
   DashboardBreakdownItem,
+  DashboardProps,
 } from "./Dashboard";
-export { default as TreasuryDashboard } from "./TreasuryDashboard";
-export { default as DAOTokenMetricsDashboard } from "./DAOTokenMetricsDashboard";
