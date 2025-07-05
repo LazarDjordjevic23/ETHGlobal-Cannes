@@ -2,7 +2,7 @@
 import { createPublicClient, http } from "viem";
 import { sepolia } from "viem/chains";
 import { getRpcUrlByChainId } from "@/constants/chains";
-import type { Address, Abi } from "viem";
+import type { Address, Abi, WalletClient } from "viem";
 
 import contractAddresses from "../../../contracts/scripts/deployments/develop-contract-addresses.json";
 import contractAbis from "../../../contracts/scripts/deployments/develop-contract-abis.json";
@@ -128,6 +128,60 @@ export const contractReadPublic = async ({
     });
 
     return result;
+  } catch (error) {
+    console.log({ error });
+    throw error;
+  }
+};
+
+export const contractWrite = async ({
+  walletClient,
+  functionName,
+  contractName,
+  args,
+  contractAddress: passedContractAddress,
+}: {
+  walletClient: WalletClient;
+  functionName: string;
+  contractName: AvailableContractName;
+  args: any;
+  contractAddress?: `0x${string}`;
+}) => {
+  if (!walletClient || !walletClient.chain || !walletClient?.account?.address) {
+    throw new Error(`Wallet not connected. Please connect your wallet first.`);
+  }
+
+  const currentChain = getChainById(walletClient.chain.id);
+  if (!currentChain) {
+    throw new Error(
+      `Unsupported chain: ${walletClient.chain.id}. Please switch to Arbitrum.`
+    );
+  }
+
+  const rpcUrl = getRpcUrlByChainId(currentChain.id);
+  const abi = getContractAbi(contractName);
+  const contractAddress =
+    passedContractAddress || getContractAddress(contractName);
+
+  const publicClient = createPublicClient({
+    chain: currentChain,
+    transport: http(rpcUrl),
+  });
+
+  try {
+    const { request } = await publicClient.simulateContract({
+      address: contractAddress,
+      abi,
+      functionName,
+      args,
+      account: walletClient.account.address,
+      chain: currentChain,
+    });
+
+    const hash = await walletClient.writeContract(request);
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+    return { hash, receipt };
   } catch (error) {
     console.log({ error });
     throw error;

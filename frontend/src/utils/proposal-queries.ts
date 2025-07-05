@@ -1,4 +1,5 @@
-import { contractReadPublic } from "./contract-interactions";
+import type { WalletClient } from "viem";
+import { contractReadPublic, contractWrite } from "./contract-interactions";
 import { divideOnWei } from "./web3";
 
 export interface ProposalDetails {
@@ -173,5 +174,25 @@ export async function getProposalVotes(proposalId: string) {
     };
   } catch (error) {
     console.error("Error fetching proposal votes:", error);
+  }
+}
+
+export async function castVote(
+  proposalId: string,
+  vote: 0 | 1 | 2,
+  walletClient: WalletClient
+) {
+  console.log({ vote });
+  try {
+    const tx = await contractWrite({
+      walletClient: walletClient,
+      contractName: "Governance",
+      functionName: "castVote",
+      args: [proposalId, vote],
+    });
+
+    return tx;
+  } catch (error) {
+    console.error("Error casting vote:", error);
   }
 }

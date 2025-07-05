@@ -5,6 +5,7 @@ import ProposalHeader from "../../components/ProposalHeader/ProposalHeader";
 import AIAgentReasoning from "./AIAgentReasoning/AIAgentReasoning";
 import ProposalDetails from "./ProposalDetails/ProposalDetails";
 import VotingResults from "./VotingResults/VotingResults";
+import VotingPower from "./VotingPower/VotingPower";
 import CastVote from "./CastVote/CastVote";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -129,7 +130,7 @@ This proposal will execute the following operations:
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <BackButton onClick={() => navigate("/proposal")} />
 
@@ -161,8 +162,14 @@ This proposal will execute the following operations:
               quorum={proposalData.quorum}
             />
 
+            {/* Voting Power */}
+            <VotingPower totalSupply={proposalData.votes.total} />
+
             {/* Voting Interface */}
-            <CastVote proposalStatus={proposalData.status} />
+            <CastVote
+              proposalStatus={proposalData.status}
+              proposalId={proposal?.proposalId}
+            />
           </div>
         </div>
       </div>

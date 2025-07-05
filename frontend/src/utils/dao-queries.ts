@@ -121,3 +121,18 @@ export const getETHTokenMetrics = async () => {
     throw error;
   }
 };
+
+export const getVotesForUser = async (userAddress: string): Promise<number> => {
+  try {
+    const result = await contractReadPublic({
+      contractName: "DAOToken",
+      functionName: "getVotes",
+      args: [userAddress],
+    });
+
+    return divideOnWei(result as bigint);
+  } catch (error) {
+    console.error("Error fetching voting power for user:", error);
+    throw error;
+  }
+};
