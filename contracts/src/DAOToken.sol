@@ -4,28 +4,31 @@ pragma solidity 0.8.28;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import {ERC20Pausable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {ERC20Votes} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MyToken is ERC20, ERC20Burnable, ERC20Pausable, Ownable, ERC20Permit, ERC20Votes {
-    constructor(address initialOwner)
-    ERC20("MyToken", "MTK")
-    Ownable(initialOwner)
-    ERC20Permit("MyToken")
-    {}
+contract DAOToken is ERC20, ERC20Burnable, ERC20Permit, ERC20Votes {
 
-    function pause() public onlyOwner {
-        _pause();
+    uint256 immutable supply = 1000 * 1e18;
+
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address[] memory receivers
+    )
+        ERC20(_name, _symbol)
+        ERC20Permit(_name)
+    {
+//        uint256 nofReceivers = receivers.length;
+//        for (uint256 i = 0; i < nofReceivers; i++){
+//            address receiver = receivers[i];
+//            _mint(receiver, supply / nofReceivers);
+//            // _delegate(receiver, receiver);
+//        }
     }
 
-    function unpause() public onlyOwner {
-        _unpause();
-    }
-
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) public {
         _mint(to, amount);
     }
 
@@ -42,7 +45,7 @@ contract MyToken is ERC20, ERC20Burnable, ERC20Pausable, Ownable, ERC20Permit, E
 
     function _update(address from, address to, uint256 value)
     internal
-    override(ERC20, ERC20Pausable, ERC20Votes)
+    override(ERC20, ERC20Votes)
     {
         super._update(from, to, value);
     }

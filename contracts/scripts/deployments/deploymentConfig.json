@@ -1,0 +1,11 @@
+{
+  "tokenOwner": "0x65CF522114b232cf5f9172F170d82Bc83676F1d6",
+  "tokenName": "DAO Token",
+  "tokenSymbol": "DAO",
+  "tokenReceivers": ["0x65CF522114b232cf5f9172F170d82Bc83676F1d6"],
+  "governorName": "DAO Governance",
+  "votingDelay": 0,
+  "votingPeriod": 180,
+  "proposalThresholdPercent": 0,
+  "quorumNumerator": 20
+}
