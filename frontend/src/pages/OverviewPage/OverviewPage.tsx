@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { Tabs, type TabItem } from "../../components/Tabs";
 import DAOTreasuryDashboard from "@/components/DAOTreasuryDashboard/DAOTreasuryDashboard";
 import StrategiesTab from "@/components/StrategiesTab/StrategiesTab";
 import { useQuery } from "@tanstack/react-query";
 import { getStrategiesMetrics } from "@/utils/strategy-queries";
+import Tabs, { type TabItem } from "@/components/Tabs/Tabs";
 
 const OverviewPage = () => {
   useQuery({

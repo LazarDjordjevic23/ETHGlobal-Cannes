@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { Tabs, type TabItem } from "../../components/Tabs";
-import ProposalsList from "../../components/Proposals/ProposalsList";
-import RequestProposal from "../../components/Proposals/RequestProposal";
+import ProposalsList from "@/components/Proposals/ProposalsList";
+import RequestProposal from "@/components/Proposals/RequestProposal";
+import Tabs, { type TabItem } from "@/components/Tabs/Tabs";
 
 const GovernancePage = () => {
   const tabs: TabItem[] = [

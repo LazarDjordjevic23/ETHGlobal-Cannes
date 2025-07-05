@@ -2,6 +2,7 @@ import React from "react";
 import logo from "@/assets/images/logo.png";
 import { Link, useLocation } from "react-router";
 import { wait } from "@/utils/time";
+import { cn } from "@/utils/className";
 import ConnectButton from "../ConnectButton/ConnectButton";
 
 interface HeaderProps {
@@ -19,6 +20,10 @@ const Header: React.FC<HeaderProps> = () => {
     window.scrollTo({ top: 0 });
   };
 
+  const isActiveLink = (linkPath: string) => {
+    return pathname === linkPath;
+  };
+
   return (
     <header className="header">
       <div className="header-content">
@@ -28,10 +33,24 @@ const Header: React.FC<HeaderProps> = () => {
           </Link>
         </div>
         <nav className="header-nav flex-1 flex justify-center">
-          <Link to="/overview" className="nav-link" onClick={handleScrollToTop}>
+          <Link
+            to="/overview"
+            className={cn(
+              "nav-link",
+              isActiveLink("/overview") && "nav-link-active"
+            )}
+            onClick={handleScrollToTop}
+          >
             Overview
           </Link>
-          <Link to="/proposal" className="nav-link" onClick={handleScrollToTop}>
+          <Link
+            to="/proposal"
+            className={cn(
+              "nav-link",
+              isActiveLink("/proposal") && "nav-link-active"
+            )}
+            onClick={handleScrollToTop}
+          >
             Governance
           </Link>
         </nav>
