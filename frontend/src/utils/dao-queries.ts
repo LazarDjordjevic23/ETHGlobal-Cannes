@@ -1,5 +1,6 @@
 import {
   contractReadPublic,
+  getContractAddress,
   type AvailableContractName,
 } from "./contract-interactions";
 import { wait } from "./time";
@@ -81,6 +82,21 @@ export const totalSupplyETHToken = async (): Promise<number> => {
     return divideOnWei(result as bigint);
   } catch (error) {
     console.error("Error fetching ETH token total supply:", error);
+    throw error;
+  }
+};
+
+export const getTreasuryETHTokenBalance = async (): Promise<number> => {
+  try {
+    const result = await contractReadPublic({
+      contractName: "ETHToken",
+      functionName: "balanceOf",
+      args: [getContractAddress("Treasury")],
+    });
+
+    return divideOnWei(result as bigint);
+  } catch (error) {
+    console.error("Error fetching treasury ETH token balance:", error);
     throw error;
   }
 };
