@@ -6,17 +6,18 @@ import { Tabs, type TabItem } from "../../components/Tabs";
 const OverviewPage = () => {
   const tabs: TabItem[] = [
     {
-      id: "treasury",
-      label: "Treasury",
-      icon: <span className="text-green-600">💰</span>,
-      content: <TreasuryDashboard />,
-    },
-    {
       id: "dao",
       label: "DAO",
       icon: <span className="text-blue-600">🏛️</span>,
       content: <DAOTokenMetricsDashboard />,
     },
+    {
+      id: "treasury",
+      label: "Treasury",
+      icon: <span className="text-green-600">💰</span>,
+      content: <TreasuryDashboard />,
+    },
+
     {
       id: "agents",
       label: "Agents",
@@ -90,7 +91,7 @@ const OverviewPage = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <Tabs tabs={tabs} defaultTab="treasury" />
+          <Tabs tabs={tabs} defaultTab="dao" />
         </motion.div>
       </div>
     </motion.div>

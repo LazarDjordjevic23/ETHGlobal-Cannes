@@ -31,7 +31,7 @@ const DAOTokenMetricsDashboard = () => {
         value: "+17.8%",
         trend: "up",
       },
-      icon: <span className="text-purple-600">💎</span>,
+      icon: <span className="text-purple-600">💵</span>,
     },
     {
       label: "Total Supply",

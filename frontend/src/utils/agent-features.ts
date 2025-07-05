@@ -25,7 +25,7 @@ const defaultFeatures = [
 
 const distractiveFeatures = [
   {
-    icon: "🐱",
+    icon: "😈",
     title: "Meme Potential",
     description:
       "Viral content opportunities and community engagement through humor",
@@ -72,7 +72,7 @@ const communistFeatures = [
 
 const capitalistFeatures = [
   {
-    icon: "💎",
+    icon: "💵",
     title: "Diamond Hands",
     description: "Long-term HODL strategies and conviction-based investing",
   },
@@ -100,13 +100,13 @@ export const getAgentFeatures = (agent: Agent | null) => {
 
   // Features based on agent personality
   switch (agent.id) {
-    case 1: // Distractive Agent 🐱
+    case 1: // Distractive Agent 😈
       return distractiveFeatures;
 
     case 2: // Communist Agent ☭
       return communistFeatures;
 
-    case 3: // Capitalist Agent 💎
+    case 3: // Capitalist Agent 💵
       return capitalistFeatures;
 
     default:

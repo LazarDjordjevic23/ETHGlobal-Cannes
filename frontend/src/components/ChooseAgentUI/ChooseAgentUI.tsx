@@ -8,10 +8,11 @@ import type { Agent } from "@/types/agent";
 const agents = [
   {
     id: 1,
-    name: "Distractive Agent 🐱",
+    name: "Destructive Agent 😈",
     description:
-      "Gets distracted by cat videos, memes, and shiny objects. Will probably forget your portfolio exists but hey, at least you'll have fun! 😅✨",
-    status: "Distracted",
+      "🧨🌀 Only through chaos, disruption, and pressure-testing can a system reveal its true strength and adaptability 🔍🧬.",
+
+    status: "Chaotic",
     strategy: "Chaos Theory Trading 🌪️",
     risk: "Chaotic",
   },
@@ -19,16 +20,16 @@ const agents = [
     id: 2,
     name: "Communist Agent ☭",
     description:
-      "OUR portfolio comrade! Redistributes your gains to everyone. No private keys, only WE keys! 🤝🔴",
+      "🧑‍🤝‍🧑💰 Wealth belongs to the people — every action should uplift the collective and reduce inequality 🌍✊.",
     status: "Sharing",
     strategy: "Collective Ownership 🤝",
     risk: "Collective",
   },
   {
     id: 3,
-    name: "Capitalist Agent 💎",
+    name: "Capitalist Agent 💵",
     description:
-      "Diamond hands 💎🙌 Number go up! Will sell your house to buy more crypto. To the moon! 🚀📈",
+      "📈🏦 Resources must flow to those who deliver the most value, driving growth through efficiency and competition 💼🔥.",
     status: "Pumping",
     strategy: "Moon Mission 🚀",
     risk: "YOLO",
@@ -176,7 +177,7 @@ const ChooseAgentUI = () => {
           </motion.div>
         </AnimatePresence>
 
-        {/* Footer */}
+        {/* Footer
         <motion.div
           className="mt-12 text-center"
           initial={{ y: 30, opacity: 0 }}
@@ -194,7 +195,7 @@ const ChooseAgentUI = () => {
           >
             Get Recommendation →
           </motion.button>
-        </motion.div>
+        </motion.div> */}
       </div>
     </motion.div>
   );
