@@ -22,9 +22,11 @@ const Header: React.FC<HeaderProps> = () => {
   return (
     <header className="header">
       <div className="header-content">
-        <Link to="/" className="logo-link flex-1">
-          <img src={logo} width={40} height={40} alt="ETHGlobal Cannes" />
-        </Link>
+        <div className="flex-1">
+          <Link to="/" className="logo-link">
+            <img src={logo} width={40} height={40} alt="ETHGlobal Cannes" />
+          </Link>
+        </div>
         <nav className="header-nav flex-1 flex justify-center">
           <Link to="/overview" className="nav-link" onClick={handleScrollToTop}>
             Overview
