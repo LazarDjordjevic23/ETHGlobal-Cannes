@@ -6,7 +6,7 @@ out = 'out'
 libs = ["lib"]
 
 # Compiler configs
-solc_version = "0.8.28"
+solc_version = "0.8.20"
 evm_version = "cancun"
 optimizer = true
 optimizer_runs = 200
@@ -48,3 +48,4 @@ arbitrumSepolia = "https://arbitrum-sepolia-rpc.publicnode.com"
 baseMainnet = "https://base.llamarpc.com"
 garfield = 'https://garfield-testnet.zircuit.com/'
 flow = 'https://testnet.evm.nodes.onflow.org'
+mantle = 'https://rpc.sepolia.mantle.xyz'
