@@ -8,7 +8,7 @@ contract VoteOnLastProposal is BaseScript {
 
     /**
      * Run this command to vote on the last proposal:
-     * forge script scripts/VoteOnLastProposal.s.sol --rpc-url sepolia --broadcast
+     * forge script scripts/VoteOnProposal.s.sol --rpc-url sepolia --broadcast
      *
      * 0 = Against
      * 1 = For

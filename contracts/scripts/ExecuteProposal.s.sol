@@ -11,7 +11,7 @@ contract ExecuteProposal is BaseScript {
      * forge script scripts/ExecuteProposal.s.sol --rpc-url sepolia --broadcast
      */
 
-    uint256 constant STRATEGY_DEPOSIT_AMOUNT = 1 * 1e18; // Same as proposal creation
+    uint256 constant STRATEGY_DEPOSIT_AMOUNT = 1000 * 1e18; // Same as proposal creation
 
     function run() external broadcast {
         // Get network and load addresses
@@ -26,7 +26,10 @@ contract ExecuteProposal is BaseScript {
         address strategyAddress = getContractAddress(addressJson, network, "Strategy");
         address ethTokenAddress = getContractAddress(addressJson, network, "ETHToken");
 
-        uint256 proposalId = 95959446933743489345185149661070899877626769715576455202852791557849037682870;
+        string memory description = "Execute Strategy 1: Deposit 10,000 ETHTokens into Aave-like protocol";
+        bytes32 descriptionHash = keccak256(bytes(description));
+
+        uint256 proposalId = 39416827618441147017931086854029343781762097229558288514278862475700103760151;
         console.log("Executing proposal", proposalId, "on network:", network);
         console.log("Governance:", governanceAddress);
 
@@ -55,9 +58,6 @@ contract ExecuteProposal is BaseScript {
         targets[0] = treasuryAddress;
         values[0] = 0;
         calldatas[0] = treasuryCalldata;
-
-        string memory description = "Execute Strategy 1: Deposit 10,000 ETHTokens into Aave-like protocol";
-        bytes32 descriptionHash = keccak256(bytes(description));
 
         // Execute the proposal
         console.log("Executing proposal...");
