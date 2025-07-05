@@ -1,0 +1,21 @@
+# Core CrewAI and AI dependencies
+crewai==0.11.0
+crewai-tools>=0.12.1
+langchain>=0.1.0
+web3==6.15.1
+eth-account>=0.10.0
+requests==2.31.0
+
+# HTTP and API dependencies
+requests>=2.31.0
+
+# Data handling and utilities
+python-dotenv==1.0.0
+
+# Required for dataclasses and type hints
+typing-extensions>=4.8.0
+
+# Required for ERC-4337 implementation
+eth-abi==4.2.1
+eth-typing==3.5.2
+eth-utils==2.3.1
