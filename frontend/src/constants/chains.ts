@@ -1,4 +1,9 @@
-import { flowTestnet, sepolia, zircuitGarfieldTestnet } from "viem/chains";
+import {
+  flowTestnet,
+  sepolia,
+  zircuitGarfieldTestnet,
+  mantleTestnet,
+} from "viem/chains";
 
 const sepoliaConfig = {
   chainId: sepolia.id,
@@ -30,15 +35,31 @@ const flowTestnetConfig = {
   blockExplorerUrls: [flowTestnet.blockExplorers.default.url],
 };
 
+const mentholTestnetConfig = {
+  chainId: mantleTestnet.id,
+  networkId: mantleTestnet.id,
+  name: mantleTestnet.name,
+  iconUrls: ["https://app.dynamic.xyz/assets/networks/eth.svg"],
+  nativeCurrency: mantleTestnet.nativeCurrency,
+  rpcUrls: [mantleTestnet.rpcUrls.default.http[0]],
+  blockExplorerUrls: [mantleTestnet.blockExplorers.default.url],
+};
+
 export const evmNetworks = [
   sepoliaConfig,
   zircuitGarfieldTestnetConfig,
   flowTestnetConfig,
+  mentholTestnetConfig,
 ];
 
-export type AvailableChainId = 11155111 | 48898 | 545;
+export type AvailableChainId = 11155111 | 48898 | 545 | 5001;
 
-export const availableChains = [sepolia, zircuitGarfieldTestnet, flowTestnet];
+export const availableChains = [
+  sepolia,
+  zircuitGarfieldTestnet,
+  flowTestnet,
+  mantleTestnet,
+];
 
 export const getChainByChainId = (chainId: AvailableChainId) => {
   return availableChains.find((chain) => chain.id === chainId) || sepolia;

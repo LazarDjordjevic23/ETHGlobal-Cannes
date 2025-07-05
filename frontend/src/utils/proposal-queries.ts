@@ -1,6 +1,7 @@
 import type { WalletClient } from "viem";
 import { contractReadPublic, contractWrite } from "./contract-interactions";
 import { divideOnWei } from "./web3";
+import type { AvailableChainId } from "@/constants/chains";
 
 export interface ProposalDetails {
   index: number;
@@ -194,5 +195,33 @@ export async function castVote(
     return tx;
   } catch (error) {
     console.error("Error casting vote:", error);
+  }
+}
+
+export async function executeProposalCreation({
+  chainId,
+}: {
+  chainId: AvailableChainId;
+}) {
+  const paramMapper: Record<AvailableChainId, string> = {
+    11155111: "ethereum",
+    48898: "zuircuit",
+    545: "flow",
+  };
+
+  try {
+    const res = await fetch(
+      `http://localhost:8000/propose?chain=${paramMapper[chainId]}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error creating proposal:", error);
   }
 }

@@ -3,12 +3,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAgent } from "@/contexts/agent-context";
 import { getAgentFeatures } from "@/utils/agent-features";
+import { useAccount } from "wagmi";
+import { executeProposalCreation } from "@/utils/proposal-queries";
+import { wait } from "@/utils/time";
+import type { AvailableChainId } from "@/constants/chains";
 
 interface ProposalRequest {
   id: string;
-  status: "idle" | "creating" | "completed";
+  status: "idle" | "creating" | "completed" | "error";
   proposalLink?: string;
   timestamp?: Date;
+  error?: string;
+  txHash?: string;
 }
 
 const RequestProposal = () => {
@@ -19,22 +25,65 @@ const RequestProposal = () => {
     status: "idle",
   });
 
+  const { chainId } = useAccount();
+
   const handleRequestProposal = async () => {
     const requestId = Date.now().toString();
+
+    // Validate chainId
+    if (!chainId || ![11155111, 48898, 545].includes(chainId)) {
+      setProposalRequest({
+        id: requestId,
+        status: "error",
+        error:
+          "Please connect to a supported network (Sepolia, Zircuit, or Flow Testnet)",
+      });
+      return;
+    }
 
     setProposalRequest({
       id: requestId,
       status: "creating",
     });
 
-    setTimeout(() => {
+    try {
+      // Step 1: Analyzing treasury data
+      await wait(1000);
+
+      // Step 2: Reviewing governance structure
+      await wait(1000);
+
+      // Step 3: Assessing community needs
+      await wait(1000);
+
+      // Step 4: Drafting proposal content and executing
+      await wait(500);
+
+      // Execute the actual proposal creation
+      const result = await executeProposalCreation({
+        chainId: chainId as AvailableChainId,
+      });
+
+      if (result) {
+        setProposalRequest({
+          id: requestId,
+          status: "completed",
+          proposalLink: `proposal-${requestId}`,
+          timestamp: new Date(),
+          txHash: result.tx_hash || result.txHash,
+        });
+      } else {
+        throw new Error("Failed to create proposal - no response from backend");
+      }
+    } catch (error) {
+      console.error("Error creating proposal:", error);
       setProposalRequest({
         id: requestId,
-        status: "completed",
-        proposalLink: `proposal-${requestId}`,
-        timestamp: new Date(),
+        status: "error",
+        error:
+          error instanceof Error ? error.message : "Failed to create proposal",
       });
-    }, 3000);
+    }
   };
 
   const handleViewProposal = () => {
@@ -148,21 +197,27 @@ const RequestProposal = () => {
               {/* Main Action Button */}
               <motion.button
                 onClick={handleRequestProposal}
-                disabled={!selectedAgent}
+                disabled={!selectedAgent || !chainId}
                 className={`font-semibold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 transform ${
-                  selectedAgent
+                  selectedAgent && chainId
                     ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
-                whileHover={selectedAgent ? { scale: 1.05 } : {}}
-                whileTap={selectedAgent ? { scale: 0.95 } : {}}
+                whileHover={selectedAgent && chainId ? { scale: 1.05 } : {}}
+                whileTap={selectedAgent && chainId ? { scale: 0.95 } : {}}
               >
                 <span className="flex items-center gap-3">
-                  <span className="text-xl">{selectedAgent ? "✨" : "🚫"}</span>
-                  {selectedAgent
+                  <span className="text-xl">
+                    {selectedAgent && chainId ? "✨" : "🚫"}
+                  </span>
+                  {selectedAgent && chainId
                     ? `Ask ${selectedAgent.name} to Create Proposal`
-                    : "Select an Agent First"}
-                  <span className="text-xl">{selectedAgent ? "✨" : "🚫"}</span>
+                    : !selectedAgent
+                    ? "Select an Agent First"
+                    : "Connect to Supported Network"}
+                  <span className="text-xl">
+                    {selectedAgent && chainId ? "✨" : "🚫"}
+                  </span>
                 </span>
               </motion.button>
             </motion.div>
@@ -256,6 +311,17 @@ const RequestProposal = () => {
                     Created at {proposalRequest.timestamp.toLocaleString()}
                   </p>
                 )}
+
+                {proposalRequest.txHash && (
+                  <div className="bg-gray-50 rounded-lg p-4 border">
+                    <p className="text-sm text-gray-600 mb-2">
+                      Transaction Hash:
+                    </p>
+                    <p className="text-xs font-mono text-gray-800 break-all">
+                      {proposalRequest.txHash}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -276,6 +342,42 @@ const RequestProposal = () => {
                   whileTap={{ scale: 0.95 }}
                 >
                   Create Another
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+
+          {proposalRequest.status === "error" && (
+            <motion.div
+              className="text-center space-y-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              {/* Error Icon */}
+              <div className="mx-auto w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-4xl text-white">❌</span>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  Proposal Creation Failed
+                </h3>
+                <p className="text-gray-600">
+                  {proposalRequest.error ||
+                    "An unexpected error occurred while creating the proposal."}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 justify-center">
+                <motion.button
+                  onClick={handleCreateAnother}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Try Again
                 </motion.button>
               </div>
             </motion.div>
