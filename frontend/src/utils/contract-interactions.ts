@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createPublicClient, http } from "viem";
 import { sepolia } from "viem/chains";
-import { getRpcUrlByChainId } from "@/constants/chains";
+import {
+  getChainByChainId,
+  getRpcUrlByChainId,
+  type AvailableChainId,
+} from "@/constants/chains";
 import type { Address, Abi, WalletClient } from "viem";
 
 import contractAddresses from "../../../contracts/scripts/deployments/develop-contract-addresses.json";
@@ -84,10 +88,6 @@ export function getContractAbi(
 
 export { contractAddresses, contractAbis };
 
-export const getChainById = (chainId: number) => {
-  return [sepolia].find((chain) => chain.id === chainId);
-};
-
 /* 
   Read from a contract without wallet (for public data)
 */
@@ -102,9 +102,9 @@ export const contractReadPublic = async ({
   functionName: string;
   args?: any;
   contractAddress?: `0x${string}`;
-  chainId?: number;
+  chainId?: AvailableChainId;
 }) => {
-  const currentChain = getChainById(chainId);
+  const currentChain = getChainByChainId(chainId);
   if (!currentChain) {
     throw new Error(`Unsupported chain: ${chainId}. Please use Sepolia.`);
   }
@@ -151,7 +151,9 @@ export const contractWrite = async ({
     throw new Error(`Wallet not connected. Please connect your wallet first.`);
   }
 
-  const currentChain = getChainById(walletClient.chain.id);
+  const currentChain = getChainByChainId(
+    walletClient.chain.id as AvailableChainId
+  );
   if (!currentChain) {
     throw new Error(
       `Unsupported chain: ${walletClient.chain.id}. Please switch to Arbitrum.`
