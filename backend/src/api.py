@@ -35,39 +35,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-class TreasuryDataModel(BaseModel):
-    """Treasury data model"""
-    eth_balance: str = Field(description="ETH balance in wei")
-    eth_token_balance: str = Field(description="ETH token balance in wei")
-    total_value_usd: float = Field(description="Total value in USD")
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "eth_balance": "1000000000000000000",
-                "eth_token_balance": "2000000000000000000",
-                "total_value_usd": 2000.0
-            }
-        }
-    )
-
-class StrategyMetricsModel(BaseModel):
-    """Strategy metrics model"""
-    apy: str = Field(description="Annual Percentage Yield")
-    tvl: str = Field(description="Total Value Locked")
-    risk_adjusted_returns: str = Field(description="Risk-adjusted returns")
-    withdrawal_liquidity: str = Field(description="Withdrawal liquidity")
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "apy": "720",
-                "tvl": "450000000000000000000000",
-                "risk_adjusted_returns": "180",
-                "withdrawal_liquidity": "8500"
-            }
-        }
-    )
+# Removed TreasuryDataModel and StrategyMetricsModel as they're no longer used in the simplified response
 
 class StrategyRecommendationModel(BaseModel):
     """Strategy recommendation model"""
@@ -106,41 +74,24 @@ class AIAnalysisModel(BaseModel):
 class ProposalResponse(BaseModel):
     """Response model for proposal creation"""
     timestamp: str = Field(description="Timestamp of the proposal creation")
-    tx_hash: Optional[str] = Field(None, description="Transaction hash if proposal was submitted")
     tx_url: Optional[str] = Field(None, description="Etherscan URL for the transaction")
     strategy_id: int = Field(description="The ID of the selected strategy")
-    expected_apy: float = Field(description="Expected Annual Percentage Yield")
-    reasoning: str = Field(description="Reasoning for the strategy selection")
-    treasury_data: TreasuryDataModel = Field(description="Current treasury data")
-    strategy_metrics: StrategyMetricsModel = Field(description="Selected strategy metrics")
+    reasoning: str = Field(description="Detailed reasoning for the strategy selection")
     ai_analysis: AIAnalysisModel = Field(description="AI analysis results")
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "timestamp": "2024-03-15T12:00:00",
-                "tx_hash": "0x123...",
-                "tx_url": "https://sepolia.etherscan.io/tx/0x123...",
-                "strategy_id": 1,
-                "expected_apy": 7.2,
-                "reasoning": "Strategy selected based on optimal risk-adjusted returns",
-                "treasury_data": {
-                    "eth_balance": "1000000000000000000",
-                    "eth_token_balance": "1000000000000000000",
-                    "total_value_usd": 2000.0
-                },
-                "strategy_metrics": {
-                    "apy": "720",
-                    "tvl": "450000000000000000000000",
-                    "risk_adjusted_returns": "180",
-                    "withdrawal_liquidity": "8500"
-                },
+                "tx_url": "https://sepolia.etherscan.io/tx/0x9e01cb1a09bb6687518611571bb67e24fb8f995586aeca28cc741383afb33390",
+                "strategy_id": 3,
+                "reasoning": "Treasury health: poor, risk tolerance: conservative, market conditions: bearish. Strategy 3 selected due to high withdrawal liquidity and balanced approach suitable for current conditions.",
                 "ai_analysis": {
                     "final_output": "Complete analysis...",
                     "strategy_recommendation": {
-                        "strategy_id": 1,
+                        "strategy_id": 3,
                         "reasoning": "Detailed reasoning...",
-                        "expected_profit": "100000"
+                        "expected_profit": "$19,950,000.00"
                     }
                 }
             }
@@ -228,12 +179,6 @@ async def create_proposal():
         
         # Run the analysis
         result = crew.run_analysis()
-        
-        # Add Etherscan link if we have a transaction hash
-        if result.get('tx_hash'):
-            result['tx_url'] = f"{SEPOLIA_EXPLORER_URL}{result['tx_hash']}"
-        else:
-            result['tx_url'] = None
             
         return result
         
