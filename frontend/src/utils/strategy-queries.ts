@@ -55,7 +55,5 @@ export const getStrategiesMetrics = async (): Promise<
     return formatted;
   });
 
-  console.log({ formattedStrategiesMetrics });
-
   return formattedStrategiesMetrics;
 };

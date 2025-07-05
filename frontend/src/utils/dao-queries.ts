@@ -51,20 +51,6 @@ export const getTokenName = async (
   }
 };
 
-export const getTreasuryBalance = async (): Promise<bigint> => {
-  try {
-    const result = await contractReadPublic({
-      contractName: "Treasury",
-      functionName: "getBalance",
-    });
-
-    return result as bigint;
-  } catch (error) {
-    console.error("Error fetching treasury balance:", error);
-    throw error;
-  }
-};
-
 export const getDAOMetrics = async () => {
   await wait(3000);
   try {

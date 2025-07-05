@@ -42,7 +42,6 @@ const ChooseAgentUI = () => {
   const [showDeployReview, setShowDeployReview] = useState(false);
 
   const handleAgentSelect = async (agent: Agent) => {
-    console.log("Selected agent:", agent);
     setSelectedAgent(agent);
     setShowDeployReview(true);
     await wait(300);
