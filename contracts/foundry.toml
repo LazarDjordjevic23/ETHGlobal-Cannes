@@ -46,3 +46,4 @@ ignore = []
 sepolia = "https://eth-sepolia.public.blastapi.io"
 arbitrumSepolia = "https://arbitrum-sepolia-rpc.publicnode.com"
 baseMainnet = "https://base.llamarpc.com"
+garfield = 'https://garfield-testnet.zircuit.com/'

@@ -90,6 +90,14 @@ abstract contract BaseScript is Script {
     }
 
     /**
+     * @dev Check if currently on Arbitrum Sepolia testnet
+     * @return bool True if the current chain is Arbitrum Sepolia
+     */
+    function isGarfield() internal view returns (bool) {
+        return block.chainid == 48898;
+    }
+
+    /**
      * @dev Check if currently on local Anvil network
      * @return bool True if the current chain is Anvil
      */
@@ -106,6 +114,7 @@ abstract contract BaseScript is Script {
         if (isSepolia()) return "sepolia";
         if (isArbitrumSepolia()) return "arbitrumSepolia";
         if (isAnvil()) return "anvil";
+        if (isGarfield()) return "garfield";
 
         // Fallback to env variable or default to current chain ID as string
         return vm.envOr("NETWORK", string(abi.encodePacked(block.chainid)));
