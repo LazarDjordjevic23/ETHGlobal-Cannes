@@ -26,7 +26,10 @@ contract ExecuteProposal is BaseScript {
         address strategyAddress = getContractAddress(addressJson, network, "Strategy");
         address ethTokenAddress = getContractAddress(addressJson, network, "ETHToken");
 
-        uint256 proposalId = 95959446933743489345185149661070899877626769715576455202852791557849037682870;
+        string memory description = "Investing strategy";
+        bytes32 descriptionHash = keccak256(bytes(description));
+
+        uint256 proposalId = 4986162384094303182851571488369443892167715431873806641606016859668217514933;
         console.log("Executing proposal", proposalId, "on network:", network);
         console.log("Governance:", governanceAddress);
 
@@ -55,9 +58,6 @@ contract ExecuteProposal is BaseScript {
         targets[0] = treasuryAddress;
         values[0] = 0;
         calldatas[0] = treasuryCalldata;
-
-        string memory description = "Execute Strategy 1: Deposit 10,000 ETHTokens into Aave-like protocol";
-        bytes32 descriptionHash = keccak256(bytes(description));
 
         // Execute the proposal
         console.log("Executing proposal...");
