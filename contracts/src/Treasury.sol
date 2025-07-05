@@ -130,14 +130,14 @@ contract Treasury is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Execute arbitrary calls (only governance)
-     * @dev This allows governance to make any call through the treasury
-     * @param target The contract to call
-     * @param value The amount of Ether to send with the call
-     * @param data The calldata to execute
-     * @return success Whether the call was successful
-     * @return returnData The return data from the call
-     */
+ * @notice Execute arbitrary calls (only governance)
+ * @dev This allows governance to make any call through the treasury
+ * @param target The contract to call
+ * @param value The amount of Ether to send with the call
+ * @param data The calldata to execute
+ * @return success Whether the call was successful
+ * @return returnData The return data from the call
+ */
     function execute(address target, uint256 value, bytes calldata data)
     external
     onlyOwner
@@ -147,8 +147,34 @@ contract Treasury is Ownable, ReentrancyGuard {
         require(target != address(0), "Treasury: target cannot be zero address");
         require(address(this).balance >= value, "Treasury: insufficient Ether for call");
 
+        // Check if this is a call to executeStrategy1, executeStrategy2, or executeStrategy3
+        bytes4 selector = bytes4(data[:4]);
+        if (selector == bytes4(keccak256("executeStrategy1(address,uint256)")) ||
+        selector == bytes4(keccak256("executeStrategy2(address,uint256)")) ||
+            selector == bytes4(keccak256("executeStrategy3(address,uint256)"))) {
+
+            // Decode the token and amount from the calldata
+            (address token, uint256 amount) = abi.decode(data[4:], (address, uint256));
+
+            // Approve the strategy to spend our tokens
+            IERC20 tokenContract = IERC20(token);
+            require(tokenContract.balanceOf(address(this)) >= amount, "Treasury: insufficient token balance");
+
+            // Approve the strategy contract to spend the tokens
+            require(tokenContract.approve(target, amount), "Treasury: approval failed");
+        }
+
         (success, returnData) = target.call{value: value}(data);
         require(success, "Treasury: call failed");
+
+        // Reset approval to 0 for security (prevent any leftover approvals)
+        if (selector == bytes4(keccak256("executeStrategy1(address,uint256)")) ||
+        selector == bytes4(keccak256("executeStrategy2(address,uint256)")) ||
+            selector == bytes4(keccak256("executeStrategy3(address,uint256)"))) {
+
+            (address token,) = abi.decode(data[4:], (address, uint256));
+            IERC20(token).approve(target, 0);
+        }
     }
 
     /**
