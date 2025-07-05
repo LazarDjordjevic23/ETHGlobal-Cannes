@@ -1,6 +1,12 @@
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router";
-import { useState } from "react";
+import BackButton from "./BackButton/BackButton";
+import ProposalHeader from "../../components/ProposalHeader/ProposalHeader";
+import AIAgentReasoning from "./AIAgentReasoning/AIAgentReasoning";
+import ProposalDetails from "./ProposalDetails/ProposalDetails";
+import ProposalTransactions from "./ProposalTransactions/ProposalTransactions";
+import VotingResults from "./VotingResults/VotingResults";
+import CastVote from "./CastVote/CastVote";
 
 interface ProposalData {
   id: string;
@@ -31,10 +37,6 @@ interface ProposalData {
 const ProposalDetail = () => {
   const { proposalId } = useParams<{ proposalId: string }>();
   const navigate = useNavigate();
-  const [selectedVote, setSelectedVote] = useState<
-    "for" | "against" | "abstain" | null
-  >(null);
-  const [hasVoted, setHasVoted] = useState(false);
 
   const proposalData: ProposalData = {
     id: proposalId || "1",
@@ -67,32 +69,6 @@ const ProposalDetail = () => {
     ],
   };
 
-  const getStatusColor = (status: ProposalData["status"]) => {
-    switch (status) {
-      case "live":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "closed":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const handleVote = (vote: "for" | "against" | "abstain") => {
-    setSelectedVote(vote);
-    setHasVoted(true);
-  };
-
-  const getVotePercentage = (voteCount: number) => {
-    return proposalData.votes.total > 0
-      ? (voteCount / proposalData.votes.total) * 100
-      : 0;
-  };
-
-  const isQuorumMet = proposalData.votes.total >= proposalData.quorum;
-
   return (
     <motion.div
       className="bg-gray-50 min-h-screen"
@@ -103,320 +79,41 @@ const ProposalDetail = () => {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
-        <motion.div
-          className="mb-6"
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <button
-            onClick={() => navigate("/proposal")}
-            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Back to Proposals
-          </button>
-        </motion.div>
+        <BackButton onClick={() => navigate("/proposal")} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Header */}
-            <motion.div
-              className="bg-white rounded-lg border border-gray-200 shadow-sm p-6"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span
-                  className={`inline-flex px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(
-                    proposalData.status
-                  )}`}
-                >
-                  {proposalData.status.toUpperCase()}
-                </span>
-                {proposalData.createdBy === "AI Agent" && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                    🤖 AI Generated
-                  </span>
-                )}
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                {proposalData.title}
-              </h1>
-              <p className="text-lg text-gray-600 mb-4">
-                {proposalData.description}
-              </p>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span>
-                  Created:{" "}
-                  {new Date(proposalData.createdAt).toLocaleDateString()}
-                </span>
-                <span>•</span>
-                <span>
-                  Voting ends:{" "}
-                  {new Date(proposalData.endDate).toLocaleDateString()}
-                </span>
-              </div>
-            </motion.div>
+            <ProposalHeader
+              title={proposalData.title}
+              description={proposalData.description}
+              status={proposalData.status}
+              createdBy={proposalData.createdBy}
+              createdAt={proposalData.createdAt}
+              endDate={proposalData.endDate}
+            />
 
             {/* AI Agent Reasoning - Special Section */}
-            <motion.div
-              className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 shadow-sm p-6"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-lg">🤖</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">
-                    AI Agent Analysis
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Why this proposal was created
-                  </p>
-                </div>
-              </div>
-              <div className="prose prose-sm max-w-none">
-                <pre className="whitespace-pre-wrap text-gray-700 font-sans leading-relaxed">
-                  {proposalData.aiReasoning}
-                </pre>
-              </div>
-            </motion.div>
+            <AIAgentReasoning reasoning={proposalData.aiReasoning} />
 
             {/* Proposal Details */}
-            <motion.div
-              className="bg-white rounded-lg border border-gray-200 shadow-sm p-6"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Proposal Details
-              </h3>
-              <div className="prose prose-sm max-w-none">
-                <div className="whitespace-pre-wrap text-gray-700">
-                  {proposalData.details}
-                </div>
-              </div>
-            </motion.div>
+            <ProposalDetails details={proposalData.details} />
 
             {/* Transactions */}
-            <motion.div
-              className="bg-white rounded-lg border border-gray-200 shadow-sm p-6"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Proposed Transactions
-              </h3>
-              <div className="space-y-3">
-                {proposalData.transactions.map((tx, index) => (
-                  <div
-                    key={index}
-                    className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="font-medium text-gray-700">
-                          Target:
-                        </span>
-                        <span className="ml-2 text-gray-600 font-mono">
-                          {tx.target}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">
-                          Function:
-                        </span>
-                        <span className="ml-2 text-gray-600">
-                          {tx.function}
-                        </span>
-                      </div>
-                      <div className="md:col-span-2">
-                        <span className="font-medium text-gray-700">
-                          Inputs:
-                        </span>
-                        <span className="ml-2 text-gray-600 font-mono">
-                          {tx.inputs}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            <ProposalTransactions transactions={proposalData.transactions} />
           </div>
 
           {/* Voting Sidebar */}
           <div className="space-y-6">
             {/* Voting Results */}
-            <motion.div
-              className="bg-white rounded-lg border border-gray-200 shadow-sm p-6"
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                Voting Results
-              </h3>
-
-              {/* Vote Bars */}
-              <div className="space-y-3 mb-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-green-600 font-medium">For</span>
-                    <span className="text-gray-600">
-                      {proposalData.votes.for} (
-                      {getVotePercentage(proposalData.votes.for).toFixed(1)}%)
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-green-600 h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${getVotePercentage(proposalData.votes.for)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-red-600 font-medium">Against</span>
-                    <span className="text-gray-600">
-                      {proposalData.votes.against} (
-                      {getVotePercentage(proposalData.votes.against).toFixed(1)}
-                      %)
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-red-600 h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${getVotePercentage(
-                          proposalData.votes.against
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600 font-medium">Abstain</span>
-                    <span className="text-gray-600">
-                      {proposalData.votes.abstain} (
-                      {getVotePercentage(proposalData.votes.abstain).toFixed(1)}
-                      %)
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-gray-400 h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${getVotePercentage(
-                          proposalData.votes.abstain
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Quorum Status */}
-              <div className="border-t pt-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">
-                    Quorum ({proposalData.quorum} required)
-                  </span>
-                  <span
-                    className={`font-medium ${
-                      isQuorumMet ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {isQuorumMet ? "Met" : "Not Met"}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full transition-all duration-500 ${
-                      isQuorumMet ? "bg-green-600" : "bg-orange-500"
-                    }`}
-                    style={{
-                      width: `${Math.min(
-                        (proposalData.votes.total / proposalData.quorum) * 100,
-                        100
-                      )}%`,
-                    }}
-                  />
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {proposalData.votes.total} / {proposalData.quorum} votes
-                </div>
-              </div>
-            </motion.div>
+            <VotingResults
+              votes={proposalData.votes}
+              quorum={proposalData.quorum}
+            />
 
             {/* Voting Interface */}
-            {proposalData.status === "live" && (
-              <motion.div
-                className="bg-white rounded-lg border border-gray-200 shadow-sm p-6"
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-              >
-                <h3 className="text-lg font-bold text-gray-900 mb-4">
-                  Cast Your Vote
-                </h3>
-                {!hasVoted ? (
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => handleVote("for")}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-                    >
-                      Vote For
-                    </button>
-                    <button
-                      onClick={() => handleVote("against")}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-                    >
-                      Vote Against
-                    </button>
-                    <button
-                      onClick={() => handleVote("abstain")}
-                      className="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-                    >
-                      Abstain
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <div className="text-green-600 text-4xl mb-2">✓</div>
-                    <p className="text-gray-900 font-medium">Vote Cast!</p>
-                    <p className="text-sm text-gray-600">
-                      You voted: {selectedVote}
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-            )}
+            <CastVote proposalStatus={proposalData.status} />
           </div>
         </div>
       </div>

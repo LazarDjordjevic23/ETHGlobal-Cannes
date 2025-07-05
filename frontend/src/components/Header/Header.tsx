@@ -3,13 +3,16 @@ import logo from "@/assets/images/logo.png";
 import { Link, useLocation } from "react-router";
 import { wait } from "@/utils/time";
 import { cn } from "@/utils/className";
-import ConnectButton from "../ConnectButton/ConnectButton";
+import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
+import { useAccount } from "wagmi";
+// import ConnectButton from "../ConnectButton/ConnectButton";
 
 interface HeaderProps {
   title?: string;
 }
 
 const Header: React.FC<HeaderProps> = () => {
+  const { isConnected } = useAccount();
   const { pathname } = useLocation();
   if (pathname === "/home" || pathname === "/") {
     return null;
@@ -32,7 +35,11 @@ const Header: React.FC<HeaderProps> = () => {
             <img src={logo} width={40} height={40} alt="ETHGlobal Cannes" />
           </Link>
         </div>
-        <nav className="header-nav flex-1 flex justify-center">
+        <nav
+          className={cn("header-nav flex-1 flex justify-end", {
+            "justify-center": isConnected,
+          })}
+        >
           <Link
             to="/overview"
             className={cn(
@@ -54,9 +61,13 @@ const Header: React.FC<HeaderProps> = () => {
             Governance
           </Link>
         </nav>
-        <div className="flex-1">
-          <ConnectButton />
-        </div>
+        {isConnected && (
+          <div className="flex-1">
+            <div className="flex justify-end">
+              <DynamicWidget />
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

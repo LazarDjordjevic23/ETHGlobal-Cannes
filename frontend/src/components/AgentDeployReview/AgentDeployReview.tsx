@@ -17,18 +17,6 @@ interface AgentDeployReviewProps {
   onBack: () => void;
 }
 
-const getAgentDescription = (agent: Agent): string => {
-  const descriptions: Record<string, string> = {
-    Destructive:
-      "A ruthless financial disruptor designed to aggressively optimize multi-chain treasury operations. This agent continuously hunts for inefficiencies in your DAO's ETHToken balances, systematically dismantling underperforming positions and reallocating capital to high-yield opportunities. It operates with zero tolerance for stagnant assets, constantly seeking to destroy poor investment decisions and rebuild stronger financial positions.",
-    Capitalist:
-      "A relentless profit maximization engine that evaluates and exploits available DeFi strategies with surgical precision. This agent investigates strategy contracts like a corporate raider, analyzing market conditions and extracting maximum value from every opportunity. It operates as your DAO's most aggressive investment arm, making cutthroat decisions to dominate yield generation and crush competition.",
-    Comunism:
-      "A collective intelligence synthesizer that democratizes insights from Destructive and Capitalist agents to create unified governance proposals. This agent operates on consensus-driven principles, ensuring all treasury decisions benefit the collective good while maintaining strategic aggression. It serves as the people's representative, translating ruthless financial strategies into actionable community-approved proposals.",
-  };
-  return descriptions[agent.name.split(" ")[0]] || agent.description;
-};
-
 const getAgentCapabilities = (agent: Agent): string[] => {
   const capabilities: Record<string, string[]> = {
     Destructive: [
