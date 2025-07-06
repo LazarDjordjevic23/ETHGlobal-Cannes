@@ -49,7 +49,7 @@ CHAIN_CONFIGS = {
     },
     "zircuit": {
         "default_rpc_url": "https://zircuit-garfield-testnet.drpc.org",
-        "explorer_url": "https://explorer.testnet.zircuit.com/tx/",
+        "explorer_url": "https://explorer.garfield-testnet.zircuit.com/tx/",
         "env_var": "ZIRCUIT_RPC_URL",
         "private_key_vars": ["PRIVATE_KEY"],
         "contract_env_vars": {
