@@ -15,7 +15,7 @@ from .services.treasury import TreasuryService
 from .services.strategy import StrategyService
 from .services.governance import GovernanceService
 from .utils import create_proposal_parameters
-from .tools import ProposalTool
+from .tools import ProposalTool, ExecuteProposalTool
 
 # Constants
 SEPOLIA_EXPLORER_URL = "https://sepolia.etherscan.io/tx/"
@@ -384,4 +384,130 @@ class ProposalCrew:
                 
         except Exception as e:
             print(f"❌ Error in crew analysis: {str(e)}")
+            raise
+
+
+class ExecutionCrew:
+    """Crew for executing governance proposals"""
+    
+    def __init__(
+        self,
+        governance_service: Optional[GovernanceService] = None,
+        treasury_address: str = "",
+        strategy_address: str = "",
+        governance_address: str = "",
+        eth_token_address: str = "",
+        explorer_url: str = SEPOLIA_EXPLORER_URL
+    ):
+        self.governance_service = governance_service
+        self.treasury_address = treasury_address
+        self.strategy_address = strategy_address
+        self.governance_address = governance_address
+        self.eth_token_address = eth_token_address
+        self.explorer_url = explorer_url
+        
+        # Get LLM
+        self.llm = get_llm()
+        
+        # Create execution tool if governance service is available
+        self.execute_tool = None
+        if self.governance_service:
+            self.execute_tool = ExecuteProposalTool(
+                governance_service=self.governance_service,
+                treasury_address=self.treasury_address,
+                strategy_address=self.strategy_address,
+                governance_address=self.governance_address,
+                eth_token_address=self.eth_token_address
+            )
+    
+    def _create_execution_agent(self) -> Agent:
+        """Create the execution agent"""
+        execution_agent = Agent(
+            role="Proposal Executor",
+            goal="Execute governance proposals that have been approved by the DAO",
+            backstory="""You are a proposal execution specialist who handles the technical 
+            execution of approved governance proposals. You ensure that proposals are 
+            executed correctly and safely, following all necessary protocols.""",
+            verbose=True,
+            allow_delegation=False,
+            llm=self.llm,
+            tools=[self.execute_tool] if self.execute_tool else []
+        )
+        return execution_agent
+    
+    def _create_execution_task(self, agent: Agent) -> Task:
+        """Create the execution task"""
+        task = Task(
+            description=f"""
+            Execute the approved governance proposal using the execute_proposal_tool.
+            
+            IMPORTANT: You must use the execute_proposal_tool to execute the proposal.
+            
+            Call the execute_proposal_tool with this exact JSON:
+            {{"strategy_id": "1", "reasoning": "Executing approved governance proposal for Strategy 1"}}
+            
+            The tool will handle all the technical details including:
+            - Using the correct proposal parameters
+            - Generating the correct description hash
+            - Submitting the execution transaction
+            
+            Just call the tool - do not try to do anything else.
+            """,
+            agent=agent,
+            tools=[self.execute_tool] if self.execute_tool else None,
+            expected_output="Result of proposal execution with transaction hash or error message"
+        )
+        return task
+    
+    def run_execution(self) -> Dict[str, Any]:
+        """Run the execution crew and return the results"""
+        print("🚀 EXECUTION CREW - AI-Driven Proposal Execution")
+        print("=" * 60)
+        
+        try:
+            # Create the execution agent and task
+            agent = self._create_execution_agent()
+            task = self._create_execution_task(agent)
+            
+            # Create and run the crew
+            crew = Crew(
+                agents=[agent],
+                tasks=[task],
+                verbose=True,
+                process=Process.sequential
+            )
+            
+            print("🚀 Starting Proposal Execution...")
+            result = crew.kickoff()
+            
+            # Parse the results
+            result_str = str(result)
+            
+            # Extract transaction hash from the result if present
+            tx_hash = None
+            if "SUCCESS: Proposal executed with transaction hash:" in result_str:
+                # Extract transaction hash from the success message
+                import re
+                hash_match = re.search(r'0x[a-fA-F0-9]{64}', result_str)
+                if hash_match:
+                    tx_hash = hash_match.group()
+                    print(f"✅ Proposal executed successfully!")
+                    print(f"📊 Transaction Hash: {tx_hash}")
+                    print(f"🔍 View on Explorer: {self.explorer_url}{tx_hash}")
+            elif "ERROR:" in result_str:
+                print("❌ Failed to execute proposal:")
+                print(result_str)
+            
+            # Create the response
+            response = {
+                "timestamp": datetime.now(UTC).isoformat(),
+                "tx_url": f"{self.explorer_url}{tx_hash}" if tx_hash else None,
+                "execution_result": result_str,
+                "success": tx_hash is not None
+            }
+            
+            return response
+                
+        except Exception as e:
+            print(f"❌ Error in execution: {str(e)}")
             raise 

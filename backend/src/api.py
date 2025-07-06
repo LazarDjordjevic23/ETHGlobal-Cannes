@@ -10,15 +10,13 @@ from web3 import Web3
 
 import os
 from .config import (
-    PRIVATE_KEY, TREASURY_ADDRESS,
-    STRATEGY_ADDRESS, GOVERNANCE_ADDRESS, ETHToken_ADDRESS
+    PRIVATE_KEY,
+    get_contract_addresses_for_chain
 )
 from .services.treasury import TreasuryService
 from .services.strategy import StrategyService
 from .services.governance import GovernanceService
-from .crew import ProposalCrew
-
-# Removed SEPOLIA_EXPLORER_URL - now using chain-specific explorer URLs
+from .crew import ProposalCrew, ExecutionCrew
 
 app = FastAPI(
     title="DAO Treasury Management API",
@@ -40,17 +38,50 @@ CHAIN_CONFIGS = {
     "ethereum": {
         "default_rpc_url": "https://ethereum-sepolia-rpc.publicnode.com",
         "explorer_url": "https://sepolia.etherscan.io/tx/",
-        "env_var": "SEPOLIA_RPC_URL"
+        "env_var": "SEPOLIA_RPC_URL",
+        "private_key_vars": ["PRIVATE_KEY"],
+        "contract_env_vars": {
+            "treasury": "ETHEREUM_TREASURY_ADDRESS",
+            "strategy": "ETHEREUM_STRATEGY_ADDRESS", 
+            "governance": "ETHEREUM_GOVERNANCE_ADDRESS",
+            "eth_token": "ETHEREUM_ETH_TOKEN_ADDRESS"
+        }
     },
-    "zuircuit": {
+    "zircuit": {
         "default_rpc_url": "https://zircuit-garfield-testnet.drpc.org",
         "explorer_url": "https://explorer.testnet.zircuit.com/tx/",
-        "env_var": "ZUIRCUIT_RPC_URL"
+        "env_var": "ZIRCUIT_RPC_URL",
+        "private_key_vars": ["PRIVATE_KEY"],
+        "contract_env_vars": {
+            "treasury": "ZIRCUIT_TREASURY_ADDRESS",
+            "strategy": "ZIRCUIT_STRATEGY_ADDRESS",
+            "governance": "ZIRCUIT_GOVERNANCE_ADDRESS", 
+            "eth_token": "ZIRCUIT_ETH_TOKEN_ADDRESS"
+        }
     },
     "flow": {
         "default_rpc_url": "https://testnet.evm.nodes.onflow.org",
         "explorer_url": "https://evm-testnet.flowscan.io/tx/",
-        "env_var": "FLOW_RPC_URL"
+        "env_var": "FLOW_RPC_URL",
+        "private_key_vars": ["PRIVATE_KEY"],
+        "contract_env_vars": {
+            "treasury": "FLOW_TREASURY_ADDRESS",
+            "strategy": "FLOW_STRATEGY_ADDRESS",
+            "governance": "FLOW_GOVERNANCE_ADDRESS",
+            "eth_token": "FLOW_ETH_TOKEN_ADDRESS"
+        }
+    },
+    "mantle": {
+        "default_rpc_url": "https://endpoints.omniatech.io/v1/mantle/sepolia/public",
+        "explorer_url": "https://sepolia.mantlescan.xyz/tx/",
+        "env_var": "MANTLE_RPC_URL",
+        "private_key_vars": ["PRIVATE_KEY"],
+        "contract_env_vars": {
+            "treasury": "MANTLE_TREASURY_ADDRESS",
+            "strategy": "MANTLE_STRATEGY_ADDRESS",
+            "governance": "MANTLE_GOVERNANCE_ADDRESS",
+            "eth_token": "MANTLE_ETH_TOKEN_ADDRESS"
+        }
     }
 }
 
@@ -135,6 +166,24 @@ class ProposalResponse(BaseModel):
         }
     )
 
+class ExecutionResponse(BaseModel):
+    """Response model for proposal execution"""
+    timestamp: str = Field(description="Timestamp of the proposal execution")
+    tx_url: Optional[str] = Field(None, description="Chain-specific explorer URL for the transaction")
+    execution_result: str = Field(description="Result of the execution")
+    success: bool = Field(description="Whether the execution was successful")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "timestamp": "2024-03-15T12:00:00",
+                "tx_url": "https://sepolia.etherscan.io/tx/0x9e01cb1a09bb6687518611571bb67e24fb8f995586aeca28cc741383afb33390",
+                "execution_result": "SUCCESS: Proposal executed with transaction hash: 0x9e01cb1a09bb6687518611571bb67e24fb8f995586aeca28cc741383afb33390",
+                "success": True
+            }
+        }
+    )
+
 class ServiceStatus(BaseModel):
     """Service health status"""
     name: str = Field(description="Service name")
@@ -185,7 +234,7 @@ class StatusResponse(BaseModel):
     )
 
 @app.post("/propose", response_model=ProposalResponse)
-async def create_proposal(chain: str = Query("ethereum", description="EVM chain to use", enum=["ethereum", "zuircuit", "flow"])):
+async def create_proposal(chain: str = Query("ethereum", description="EVM chain to use", enum=["ethereum", "zircuit", "flow", "mantle"])):
     """
     Create a new governance proposal using AI analysis.
     
@@ -196,17 +245,27 @@ async def create_proposal(chain: str = Query("ethereum", description="EVM chain 
     
     Supports multiple EVM chains through the chain parameter:
     - ethereum: Ethereum Sepolia testnet
-    - zuircuit: Zircuit testnet
+    - zircuit: Zircuit testnet
     - flow: Flow EVM testnet
+    - mantle: Mantle testnet
+    
+    Environment Variables:
+    - PRIVATE_KEY: Private key used for all chains
     
     RPC URL Override via Environment Variables:
-    - SEPOLIA_RPC_URL: Override Ethereum (Sepolia) testnet RPC URL
-    - ZUIRCUIT_RPC_URL: Override Zircuit testnet RPC URL
+    - ETHEREUM_RPC_URL: Fallback for Ethereum chain
+    - ZIRCUIT_RPC_URL: Override Zircuit testnet RPC URL
     - FLOW_RPC_URL: Override Flow testnet RPC URL
-    - ETHEREUM_RPC_URL: Fallback for Ethereum chain (backward compatibility)
+    - MANTLE_RPC_URL: Override Mantle testnet RPC URL
+    
+    Chain-Specific Contract Address Environment Variables:
+    - ETHEREUM_TREASURY_ADDRESS, ETHEREUM_STRATEGY_ADDRESS, ETHEREUM_GOVERNANCE_ADDRESS, ETHEREUM_ETH_TOKEN_ADDRESS
+    - ZIRCUIT_TREASURY_ADDRESS, ZIRCUIT_STRATEGY_ADDRESS, ZIRCUIT_GOVERNANCE_ADDRESS, ZIRCUIT_ETH_TOKEN_ADDRESS
+    - FLOW_TREASURY_ADDRESS, FLOW_STRATEGY_ADDRESS, FLOW_GOVERNANCE_ADDRESS, FLOW_ETH_TOKEN_ADDRESS
+    - MANTLE_TREASURY_ADDRESS, MANTLE_STRATEGY_ADDRESS, MANTLE_GOVERNANCE_ADDRESS, MANTLE_ETH_TOKEN_ADDRESS
     
     Args:
-        chain: EVM chain to use (ethereum, zuircuit, flow). Defaults to ethereum.
+        chain: EVM chain to use (ethereum, zircuit, flow, mantle). Defaults to ethereum.
     
     Returns:
         ProposalResponse: The proposal details and analysis results with chain-specific explorer URL
@@ -217,21 +276,24 @@ async def create_proposal(chain: str = Query("ethereum", description="EVM chain 
         
         # Log which RPC URL is being used for debugging
         print(f"🌐 Using RPC URL for {chain}: {rpc_url}")
+
+        # Get chain-specific contract addresses
+        chain_addresses = get_contract_addresses_for_chain(chain)
         
-        # Initialize services with chain-specific RPC URL
+        # Initialize services with chain-specific RPC URL and private key
         treasury_service = TreasuryService(rpc_url)
         strategy_service = StrategyService(rpc_url)
-        governance_service = GovernanceService(rpc_url, PRIVATE_KEY) if PRIVATE_KEY else None
+        governance_service = GovernanceService(rpc_url, PRIVATE_KEY)
         
         # Create and run the crew
         crew = ProposalCrew(
             treasury_service=treasury_service,
             strategy_service=strategy_service,
             governance_service=governance_service,
-            treasury_address=TREASURY_ADDRESS,
-            strategy_address=STRATEGY_ADDRESS,
-            governance_address=GOVERNANCE_ADDRESS,
-            eth_token_address=ETHToken_ADDRESS,
+            treasury_address=chain_addresses["treasury"],
+            strategy_address=chain_addresses["strategy"],
+            governance_address=chain_addresses["governance"],
+            eth_token_address=chain_addresses["eth_token"],
             explorer_url=CHAIN_CONFIGS[chain]["explorer_url"]
         )
         
@@ -246,18 +308,98 @@ async def create_proposal(chain: str = Query("ethereum", description="EVM chain 
             detail=f"Failed to create proposal: {str(e)}"
         )
 
+@app.post("/execute", response_model=ExecutionResponse)
+async def execute_proposal(chain: str = Query("ethereum", description="EVM chain to use", enum=["ethereum", "zircuit", "flow", "mantle"])):
+    """
+    Execute an approved governance proposal.
+    
+    The endpoint will:
+    1. Execute the approved governance proposal for chosen Strategy
+    2. Submit the execution transaction to the blockchain
+    3. Return the execution result
+    
+    Supports multiple EVM chains through the chain parameter:
+    - ethereum: Ethereum Sepolia testnet
+    - zircuit: Zircuit testnet
+    - flow: Flow EVM testnet
+    - mantle: Mantle testnet
+    
+    RPC URL Override via Environment Variables:
+    - ETHEREUM_RPC_URL: Override Ethereum testnet RPC URL
+    - ZIRCUIT_RPC_URL: Override Zircuit testnet RPC URL
+    - FLOW_RPC_URL: Override Flow testnet RPC URL
+    - MANTLE_RPC_URL: Override Mantle testnet RPC URL
+    
+    Chain-Specific Contract Address Environment Variables:
+    - ETHEREUM_TREASURY_ADDRESS, ETHEREUM_STRATEGY_ADDRESS, ETHEREUM_GOVERNANCE_ADDRESS, ETHEREUM_ETH_TOKEN_ADDRESS
+    - ZIRCUIT_TREASURY_ADDRESS, ZIRCUIT_STRATEGY_ADDRESS, ZIRCUIT_GOVERNANCE_ADDRESS, ZIRCUIT_ETH_TOKEN_ADDRESS
+    - FLOW_TREASURY_ADDRESS, FLOW_STRATEGY_ADDRESS, FLOW_GOVERNANCE_ADDRESS, FLOW_ETH_TOKEN_ADDRESS
+    - MANTLE_TREASURY_ADDRESS, MANTLE_STRATEGY_ADDRESS, MANTLE_GOVERNANCE_ADDRESS, MANTLE_ETH_TOKEN_ADDRESS
+    
+    Args:
+        chain: EVM chain to use (ethereum, zircuit, flow, mantle). Defaults to ethereum.
+    
+    Returns:
+        ExecutionResponse: The execution details and results with chain-specific explorer URL
+    """
+    try:
+        # Get chain-specific configuration
+        rpc_url = get_rpc_url(chain)
+        
+        # Log which RPC URL is being used for debugging
+        print(f"🌐 Using RPC URL for {chain}: {rpc_url}")
+
+        governance_service = GovernanceService(rpc_url, PRIVATE_KEY)
+        
+        if not governance_service:
+            raise HTTPException(
+                status_code=400,
+                detail="Governance service not available - private key not configured"
+            )
+        
+        # Get chain-specific contract addresses
+        chain_addresses = get_contract_addresses_for_chain(chain)
+        
+        # Create and run the execution crew
+        crew = ExecutionCrew(
+            governance_service=governance_service,
+            treasury_address=chain_addresses["treasury"],
+            strategy_address=chain_addresses["strategy"],
+            governance_address=chain_addresses["governance"],
+            eth_token_address=chain_addresses["eth_token"],
+            explorer_url=CHAIN_CONFIGS[chain]["explorer_url"]
+        )
+        
+        # Run the execution
+        result = crew.run_execution()
+            
+        return result
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to execute proposal: {str(e)}"
+        )
+
 @app.get("/status", response_model=StatusResponse)
-async def get_status(chain: str = Query("ethereum", description="EVM chain to check status for", enum=["ethereum", "zuircuit", "flow"])):
+async def get_status(chain: str = Query("ethereum", description="EVM chain to check status for", enum=["ethereum", "zircuit", "flow", "mantle"])):
     """
     Get the current status of the API and its services for a specific chain.
     
     Supports multiple EVM chains through the chain parameter:
     - ethereum: Ethereum Sepolia testnet
-    - zuircuit: Zircuit testnet
+    - zircuit: Zircuit testnet
     - flow: Flow EVM testnet
+    - mantle: Mantle testnet
+    
+    Chain-Specific Contract Address Environment Variables:
+    - ETHEREUM_TREASURY_ADDRESS, ETHEREUM_STRATEGY_ADDRESS, ETHEREUM_GOVERNANCE_ADDRESS, ETHEREUM_ETH_TOKEN_ADDRESS
+    - ZIRCUIT_TREASURY_ADDRESS, ZIRCUIT_STRATEGY_ADDRESS, ZIRCUIT_GOVERNANCE_ADDRESS, ZIRCUIT_ETH_TOKEN_ADDRESS
+    - FLOW_TREASURY_ADDRESS, FLOW_STRATEGY_ADDRESS, FLOW_GOVERNANCE_ADDRESS, FLOW_ETH_TOKEN_ADDRESS
+    - MANTLE_TREASURY_ADDRESS, MANTLE_STRATEGY_ADDRESS, MANTLE_GOVERNANCE_ADDRESS, MANTLE_ETH_TOKEN_ADDRESS
     
     Args:
-        chain: EVM chain to check status for (ethereum, zuircuit, flow). Defaults to ethereum.
+        chain: EVM chain to check status for (ethereum, zircuit, flow, mantle). Defaults to ethereum.
     
     Returns:
         StatusResponse: The current status of all services and configuration for the specified chain
@@ -265,6 +407,9 @@ async def get_status(chain: str = Query("ethereum", description="EVM chain to ch
     try:
         # Get RPC URL for the specified chain
         rpc_url = get_rpc_url(chain)
+        
+        # Get chain-specific contract addresses
+        chain_addresses = get_contract_addresses_for_chain(chain)
         
         services = []
         
@@ -286,28 +431,29 @@ async def get_status(chain: str = Query("ethereum", description="EVM chain to ch
         # Check Treasury contract
         try:
             treasury_service = TreasuryService(rpc_url)
-            treasury_data = treasury_service.get_treasury_data(TREASURY_ADDRESS, ETHToken_ADDRESS)
+            treasury_data = treasury_service.get_treasury_data(chain_addresses["treasury"], chain_addresses["eth_token"])
             treasury_status = {
                 "name": "treasury",
                 "status": "healthy",
                 "details": {
                     "eth_balance": str(treasury_data.eth_balance),
                     "eth_token_balance": str(treasury_data.eth_token_balance),
-                    "chain": chain
+                    "chain": chain,
+                    "address": chain_addresses["treasury"]
                 }
             }
         except Exception as e:
             treasury_status = {
                 "name": "treasury",
                 "status": "unhealthy",
-                "details": {"error": str(e), "chain": chain}
+                "details": {"error": str(e), "chain": chain, "address": chain_addresses["treasury"]}
             }
         services.append(ServiceStatus(**treasury_status))
         
         # Check Strategy contract
         try:
             strategy_service = StrategyService(rpc_url)
-            strategies = strategy_service.get_all_strategies(STRATEGY_ADDRESS)
+            strategies = strategy_service.get_all_strategies(chain_addresses["strategy"])
             strategy_status = {
                 "name": "strategy",
                 "status": "healthy",
@@ -320,25 +466,27 @@ async def get_status(chain: str = Query("ethereum", description="EVM chain to ch
                             "tvl": str(s.tvl)
                         } for s in strategies
                     ],
-                    "chain": chain
+                    "chain": chain,
+                    "address": chain_addresses["strategy"]
                 }
             }
         except Exception as e:
             strategy_status = {
                 "name": "strategy",
                 "status": "unhealthy",
-                "details": {"error": str(e), "chain": chain}
+                "details": {"error": str(e), "chain": chain, "address": chain_addresses["strategy"]}
             }
         services.append(ServiceStatus(**strategy_status))
-        
-        # Check Governance setup
+
         governance_status = {
             "name": "governance",
             "status": "configured" if PRIVATE_KEY else "unconfigured",
             "details": {
                 "has_private_key": bool(PRIVATE_KEY),
-                "address": GOVERNANCE_ADDRESS,
-                "chain": chain
+                "private_key_vars_checked": CHAIN_CONFIGS[chain]["private_key_vars"],
+                "address": chain_addresses["governance"],
+                "chain": chain,
+                "contract_env_vars": CHAIN_CONFIGS[chain]["contract_env_vars"]
             }
         }
         services.append(ServiceStatus(**governance_status))
@@ -346,11 +494,11 @@ async def get_status(chain: str = Query("ethereum", description="EVM chain to ch
         # Prepare configuration status (hide sensitive data)
         config = {
             "rpc_url": rpc_url,
-            "treasury_address": TREASURY_ADDRESS,
-            "strategy_address": STRATEGY_ADDRESS,
-            "governance_address": GOVERNANCE_ADDRESS,
-            "eth_token_address": ETHToken_ADDRESS,
-            "has_private_key": bool(PRIVATE_KEY),
+            "treasury_address": chain_addresses["treasury"],
+            "strategy_address": chain_addresses["strategy"],
+            "governance_address": chain_addresses["governance"],
+            "eth_token_address": chain_addresses["eth_token"],
+            "has_chain_private_key": bool(PRIVATE_KEY),
             "chain": chain,
             "explorer_url": CHAIN_CONFIGS[chain]["explorer_url"]
         }
