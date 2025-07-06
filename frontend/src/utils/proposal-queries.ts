@@ -189,7 +189,7 @@ export async function castVote(
       walletClient: walletClient,
       contractName: "Governance",
       functionName: "castVote",
-      args: [proposalId, vote],
+      args: [BigInt(proposalId), vote],
     });
 
     return tx;
@@ -221,6 +221,7 @@ export async function executeProposalCreation({
       }
     );
     const data = await res.json();
+
     return data;
   } catch (error) {
     console.error("Error creating proposal:", error);

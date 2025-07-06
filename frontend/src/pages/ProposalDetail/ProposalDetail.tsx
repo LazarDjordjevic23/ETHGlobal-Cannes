@@ -10,9 +10,10 @@ import CastVote from "./CastVote/CastVote";
 import { useQuery } from "@tanstack/react-query";
 import {
   getProposalVotes,
-  getProposalByIndex,
+  getLastProposal,
 } from "../../utils/proposal-queries";
 import { useAgent } from "@/contexts/agent-context";
+import { totalSupplyDaoToken } from "@/utils/dao-queries";
 
 export interface Votes {
   for: number;
@@ -53,8 +54,8 @@ const ProposalDetail = () => {
 
   // Fetch proposal by index (assuming proposalId is the index)
   const { data: proposal } = useQuery({
-    queryKey: ["proposal", proposalId],
-    queryFn: () => getProposalByIndex(Number(proposalId) || 0),
+    queryKey: ["last-proposal"],
+    queryFn: getLastProposal,
     enabled: !!proposalId,
   });
 
@@ -63,6 +64,11 @@ const ProposalDetail = () => {
     queryKey: ["proposal-votes", proposal?.proposalId],
     queryFn: () => getProposalVotes(proposal!.proposalId),
     enabled: !!proposal?.proposalId,
+  });
+
+  const { data: totalSupply } = useQuery({
+    queryKey: ["total-supply"],
+    queryFn: totalSupplyDaoToken,
   });
 
   console.log({ proposal, votes, contextProposalData });
@@ -127,7 +133,7 @@ This proposal will execute the following operations:
       abstain: 45,
       total: 1368,
     },
-    quorum: 1000,
+    quorum: totalSupply || 0,
     aiReasoning:
       contextProposalData?.reasoning ||
       "Based on comprehensive market analysis and risk assessment, I identified several key factors that support this proposal:\n\n1. **Market Opportunity**: Current DeFi yields are significantly higher than traditional treasury management, with established protocols offering 12-18% APY.\n\n2. **Risk Mitigation**: The proposed allocation maintains a conservative approach while still capturing meaningful yield opportunities.\n\n3. **Protocol Selection**: I analyzed multiple DeFi protocols and identified those with proven track records, strong security audits, and consistent yield performance.\n\n4. **Treasury Optimization**: This strategy will generate additional returns compared to current yield.\n\n5. **Community Benefit**: Increased treasury returns directly benefit all token holders and provide more resources for DAO operations and community initiatives.",
@@ -225,7 +231,7 @@ This proposal will execute the following operations:
             />
 
             {/* Voting Power */}
-            <VotingPower totalSupply={proposalData.votes.total} />
+            <VotingPower totalSupply={proposalData.quorum} />
 
             {/* Voting Interface */}
             <CastVote

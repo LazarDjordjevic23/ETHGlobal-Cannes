@@ -115,7 +115,7 @@ const RequestProposal = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <motion.div
         className="text-center"
