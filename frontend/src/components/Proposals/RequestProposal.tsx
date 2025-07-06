@@ -5,7 +5,7 @@ import { useAgent } from "@/contexts/agent-context";
 import { getAgentFeatures } from "@/utils/agent-features";
 import { useAccount } from "wagmi";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
-import { executeProposalCreation } from "@/utils/proposal-queries";
+import { submitProposalCreation } from "@/utils/proposal-queries";
 import { wait } from "@/utils/time";
 import { availableChains, type AvailableChainId } from "@/constants/chains";
 import type { ProposalResponse } from "@/contexts/agent-context";
@@ -69,7 +69,7 @@ const RequestProposal = () => {
       await wait(500);
 
       // Execute the actual proposal creation
-      const result = await executeProposalCreation({
+      const result = await submitProposalCreation({
         chainId: chainId as AvailableChainId,
       });
 

@@ -4,8 +4,13 @@ import { useAccount } from "wagmi";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useWalletClient } from "wagmi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { castVote } from "../../../utils/proposal-queries";
+import {
+  castVote,
+  executeProposalCreation,
+} from "../../../utils/proposal-queries";
 import { toast } from "sonner";
+import { wait } from "@/utils/time";
+import { type AvailableChainId } from "@/constants/chains";
 
 interface CastVoteProps {
   proposalStatus: "pending" | "live" | "closed";
@@ -71,7 +76,13 @@ const CastVote = ({ proposalStatus, proposalId }: CastVoteProps) => {
         proposalId,
         voteValue as 0 | 1 | 2,
         walletClient
-      );
+      ).then(async () => {
+        await wait(1000);
+        const result = await executeProposalCreation({
+          chainId: walletClient.chain.id as AvailableChainId,
+        });
+        console.log({ result });
+      });
       return { tx, vote };
     },
     onSuccess: (data) => {
