@@ -83,7 +83,7 @@ class ExecuteProposalTool(BaseTool):
             )
             
             # Create the description hash from the exact same description used in proposal creation
-            description = "Investing strategy"
+            description = "Investing strategy ethcannes"
             description_hash = Web3.keccak(text=description)
             
             print(f"🔍 Executing proposal with description: {description}")
