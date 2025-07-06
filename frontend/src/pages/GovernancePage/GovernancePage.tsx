@@ -6,16 +6,16 @@ import Tabs, { type TabItem } from "@/components/Tabs/Tabs";
 const GovernancePage = () => {
   const tabs: TabItem[] = [
     {
-      id: "request",
-      label: "Request Proposal",
-      icon: <span className="text-green-600">🤖</span>,
-      content: <RequestProposal />,
-    },
-    {
       id: "proposals",
       label: "Proposals List",
       icon: <span className="text-blue-600">📋</span>,
       content: <ProposalsList />,
+    },
+    {
+      id: "request",
+      label: "Request Proposal",
+      icon: <span className="text-green-600">🤖</span>,
+      content: <RequestProposal />,
     },
   ];
 
@@ -50,7 +50,7 @@ const GovernancePage = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <Tabs tabs={tabs} defaultTab="request" />
+          <Tabs tabs={tabs} defaultTab="proposals" />
         </motion.div>
       </div>
     </motion.div>
