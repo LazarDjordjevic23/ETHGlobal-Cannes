@@ -60,7 +60,7 @@ const ProposalDetail = () => {
   const { data: proposal } = useQuery({
     queryKey: ["last-proposal"],
     queryFn: () => getLastProposal(chainId as AvailableChainId),
-    enabled: !!proposalId,
+    enabled: !!chainId,
   });
 
   // Fetch votes for the proposal
@@ -68,12 +68,14 @@ const ProposalDetail = () => {
     queryKey: ["proposal-votes", proposal?.proposalId],
     queryFn: () =>
       getProposalVotes(proposal!.proposalId, chainId as AvailableChainId),
-    enabled: !!proposal?.proposalId,
+    enabled: !!chainId,
   });
 
   const { data: totalSupply } = useQuery({
     queryKey: ["total-supply"],
-    queryFn: totalSupplyDaoToken,
+    queryFn: () =>
+      totalSupplyDaoToken({ chainId: chainId as AvailableChainId }),
+    enabled: !!chainId,
   });
 
   // Create details from blockchain data if proposal exists

@@ -3,12 +3,14 @@ import NumberDisplay from "@/components/NumberDisplay/NumberDisplay";
 import { getVotesForUser } from "@/utils/dao-queries";
 import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
+import type { AvailableChainId } from "@/constants/chains";
 
 const VotingPower = ({ totalSupply }: { totalSupply: number }) => {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const { data: votingPower = 0, isLoading: isVotingPowerLoading } = useQuery({
     queryKey: ["votingPower", address],
-    queryFn: () => getVotesForUser(address || ""),
+    queryFn: () =>
+      getVotesForUser(address || "", (chainId as AvailableChainId) || 48898),
     enabled: !!address,
   });
 

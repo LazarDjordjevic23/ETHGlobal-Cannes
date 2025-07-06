@@ -121,10 +121,10 @@ export const contractReadPublic = async ({
   const rpcUrl = getRpcUrlByChainId(currentChain.id);
   const abi = getContractAbi(contractName, chainName);
 
+  console.log({ chainName, functionName });
+
   const contractAddress =
     passedContractAddress || getContractAddress(contractName, chainName);
-
-  console.log({ chainId, currentChain, contractAddress });
 
   const publicClient = createPublicClient({
     chain: currentChain,

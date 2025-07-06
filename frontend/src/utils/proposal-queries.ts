@@ -2,7 +2,6 @@ import type { WalletClient } from "viem";
 import { contractReadPublic, contractWrite } from "./contract-interactions";
 import { divideOnWei } from "./web3";
 import type { AvailableChainId } from "@/constants/chains";
-import { flowTestnet } from "viem/chains";
 
 export interface ProposalDetails {
   index: number;
@@ -21,12 +20,13 @@ function decodeCalldata(): string {
 export async function getLastProposal(
   chainId: AvailableChainId
 ): Promise<ProposalDetails | null> {
+  console.log({ chainId });
   try {
     const proposalCount = await contractReadPublic({
       contractName: "Governance",
       functionName: "proposalCount",
       args: [],
-      chainId: flowTestnet.id,
+      chainId,
     });
 
     console.log({ proposalCount });
@@ -113,48 +113,6 @@ export async function getProposalByIndex(
   } catch (error) {
     console.error("Error fetching proposal by index:", error);
     return null;
-  }
-}
-
-export async function getAllProposals(
-  chainId: AvailableChainId
-): Promise<ProposalDetails[]> {
-  try {
-    const proposalCount = await contractReadPublic({
-      contractName: "Governance",
-      functionName: "proposalCount",
-      chainId: flowTestnet.id,
-      args: [],
-    });
-
-    const count = Number(proposalCount);
-    // console.log(`Total proposals: ${count}`);
-
-    if (count === 0) {
-      // console.log("No proposals found");
-      return [];
-    }
-
-    const proposals: ProposalDetails[] = [];
-
-    for (let i = 0; i < count; i++) {
-      try {
-        const proposal = await getProposalByIndex(i, chainId);
-        if (proposal) {
-          proposals.push(proposal);
-          // console.log(`✅ Fetched proposal ${i + 1}/${count}`);
-        }
-      } catch (error) {
-        console.error(`❌ Failed to fetch proposal ${i}:`, error);
-      }
-    }
-
-    console.log({ proposals });
-
-    return proposals;
-  } catch (error) {
-    console.error("Error fetching all proposals:", error);
-    return [];
   }
 }
 

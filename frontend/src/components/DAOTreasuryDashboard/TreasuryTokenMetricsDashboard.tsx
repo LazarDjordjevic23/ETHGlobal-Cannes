@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import Dashboard, { type DashboardMetric } from "../Dashboard/Dashboard";
 import { getETHTokenMetrics } from "@/utils/dao-queries";
+import { useAccount } from "wagmi";
+import type { AvailableChainId } from "@/constants/chains";
 
 const TreasuryTokenMetricsDashboard = () => {
+  const { chainId } = useAccount();
   const { data: ethTokenData, isLoading } = useQuery({
     queryKey: ["ethTokenMetrics"],
-    queryFn: getETHTokenMetrics,
+    queryFn: () => getETHTokenMetrics(chainId as AvailableChainId),
   });
 
   const formatTotalSupply = () => {

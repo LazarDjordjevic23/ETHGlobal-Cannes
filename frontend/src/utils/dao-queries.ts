@@ -1,3 +1,4 @@
+import type { AvailableChainId } from "@/constants/chains";
 import {
   contractReadPublic,
   getContractAddress,
@@ -5,12 +6,18 @@ import {
 } from "./contract-interactions";
 import { wait } from "./time";
 import { divideOnWei } from "./web3";
+import { sepolia } from "viem/chains";
 
-export const totalSupplyDaoToken = async (): Promise<number> => {
+export const totalSupplyDaoToken = async ({
+  chainId = sepolia.id,
+}: {
+  chainId?: AvailableChainId;
+}): Promise<number> => {
   try {
     const result = await contractReadPublic({
       contractName: "DAOToken",
       functionName: "totalSupply",
+      chainId,
     });
 
     return divideOnWei(result as bigint);
@@ -52,11 +59,13 @@ export const getTokenName = async (
   }
 };
 
-export const getDAOMetrics = async () => {
+export const getDAOMetrics = async (chainId?: number | undefined) => {
   await wait(3000);
   try {
     const [totalSupply, tokenName, tokenSymbol] = await Promise.all([
-      totalSupplyDaoToken(),
+      totalSupplyDaoToken({
+        chainId: (chainId as AvailableChainId) || sepolia.id,
+      }),
       getTokenName("DAOToken"),
       getTokenSymbol("DAOToken"),
     ]);
@@ -72,11 +81,16 @@ export const getDAOMetrics = async () => {
   }
 };
 
-export const totalSupplyETHToken = async (): Promise<number> => {
+export const totalSupplyETHToken = async ({
+  chainId = sepolia.id,
+}: {
+  chainId?: AvailableChainId;
+}): Promise<number> => {
   try {
     const result = await contractReadPublic({
       contractName: "ETHToken",
       functionName: "totalSupply",
+      chainId,
     });
 
     return divideOnWei(result as bigint);
@@ -101,12 +115,14 @@ export const getTreasuryETHTokenBalance = async (): Promise<number> => {
   }
 };
 
-export const getETHTokenMetrics = async () => {
+export const getETHTokenMetrics = async (chainId?: number | undefined) => {
   await wait(3000);
 
   try {
     const [totalSupply, tokenName, tokenSymbol] = await Promise.all([
-      totalSupplyETHToken(),
+      totalSupplyETHToken({
+        chainId: (chainId as AvailableChainId) || sepolia.id,
+      }),
       getTokenName("ETHToken"),
       getTokenSymbol("ETHToken"),
     ]);
@@ -122,12 +138,16 @@ export const getETHTokenMetrics = async () => {
   }
 };
 
-export const getVotesForUser = async (userAddress: string): Promise<number> => {
+export const getVotesForUser = async (
+  userAddress: string,
+  chainId: AvailableChainId
+): Promise<number> => {
   try {
     const result = await contractReadPublic({
       contractName: "DAOToken",
       functionName: "getVotes",
       args: [userAddress],
+      chainId,
     });
 
     return divideOnWei(result as bigint);
