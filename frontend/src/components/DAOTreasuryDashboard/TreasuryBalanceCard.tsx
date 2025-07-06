@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { getTreasuryETHTokenBalance } from "@/utils/dao-queries";
 import NumberDisplay from "../NumberDisplay/NumberDisplay";
+import { useAccount } from "wagmi";
+import type { AvailableChainId } from "@/constants/chains";
 
 const TreasuryBalanceCard = () => {
+  const { chainId } = useAccount();
+
   const { data: treasuryBalance, isLoading } = useQuery({
-    queryKey: ["treasuryBalance"],
-    queryFn: getTreasuryETHTokenBalance,
+    queryKey: ["treasuryBalance", chainId],
+    queryFn: () => getTreasuryETHTokenBalance(chainId as AvailableChainId),
   });
 
   const formatTreasuryBalance = () => {

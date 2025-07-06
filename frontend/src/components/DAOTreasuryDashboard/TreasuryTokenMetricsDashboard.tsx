@@ -7,8 +7,9 @@ import type { AvailableChainId } from "@/constants/chains";
 const TreasuryTokenMetricsDashboard = () => {
   const { chainId } = useAccount();
   const { data: ethTokenData, isLoading } = useQuery({
-    queryKey: ["ethTokenMetrics"],
+    queryKey: ["ethTokenMetrics", chainId],
     queryFn: () => getETHTokenMetrics(chainId as AvailableChainId),
+    enabled: !!chainId,
   });
 
   const formatTotalSupply = () => {

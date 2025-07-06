@@ -2,6 +2,7 @@
 Tool for executing governance proposals using the governance service.
 """
 
+import os
 import json
 from typing import Optional, Dict, Any
 from pydantic import Field, ConfigDict
@@ -83,7 +84,8 @@ class ExecuteProposalTool(BaseTool):
             )
             
             # Create the description hash from the exact same description used in proposal creation
-            description = "Investing strategy!"
+            # description = "Investing strategy1"
+            description = os.getenv("DESCRIPTION")
             description_hash = Web3.keccak(text=description)
             
             print(f"🔍 Executing proposal with description: {description}")

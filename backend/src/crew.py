@@ -3,6 +3,7 @@ CrewAI implementation for strategy analysis and proposal creation.
 """
 
 import json
+import os
 from datetime import datetime, UTC
 from typing import Optional, Dict, Any
 from web3 import Web3
@@ -164,7 +165,7 @@ class ProposalCrew:
             You must use the proposal_tool with a JSON string containing:
             {{
                 "proposal_title": "title for the proposal",
-                "proposal_description": "Investing strategy",
+                "proposal_description": ${os.getenv("DESCRIPTION")},
                 "strategy_id": "chosen strategy id (1, 2, or 3)",
                 "expected_profit": "estimated profit in USD",
                 "risk_assessment": "risk analysis",
@@ -362,7 +363,8 @@ class ProposalCrew:
                     reasoning = " ".join(filtered_sentences[:3])  # Take first 3 relevant sentences
                         
             # Set description to hardcoded value
-            description = "Investing strategy"
+            # description = "Investing strategy1"
+            description = os.getenv("DESCRIPTION")
             
             # Create the response
             response = {

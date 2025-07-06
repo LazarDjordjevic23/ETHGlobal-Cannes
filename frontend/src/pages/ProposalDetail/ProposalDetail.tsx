@@ -65,10 +65,10 @@ const ProposalDetail = () => {
 
   // Fetch votes for the proposal
   const { data: votes } = useQuery({
-    queryKey: ["proposal-votes", proposal?.proposalId],
+    queryKey: ["proposal-votes", proposal?.proposalId, chainId],
     queryFn: () =>
       getProposalVotes(proposal!.proposalId, chainId as AvailableChainId),
-    enabled: !!chainId,
+    enabled: !!chainId && !!proposal?.proposalId,
   });
 
   const { data: totalSupply } = useQuery({

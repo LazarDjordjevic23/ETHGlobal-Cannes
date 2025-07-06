@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import Dashboard, { type DashboardMetric } from "../Dashboard/Dashboard";
 import { getDAOMetrics } from "@/utils/dao-queries";
+import { useAccount } from "wagmi";
 
 const DAOTokenMetricsDashboard = () => {
+  const { chainId } = useAccount();
+
   const { data: daoData, isLoading } = useQuery({
-    queryKey: ["daoMetrics"],
-    queryFn: getDAOMetrics,
+    queryKey: ["daoMetrics", chainId],
+    queryFn: () => getDAOMetrics(chainId),
+    enabled: !!chainId,
   });
 
   const formatTotalSupply = () => {

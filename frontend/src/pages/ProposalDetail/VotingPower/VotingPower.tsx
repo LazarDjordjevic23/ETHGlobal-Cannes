@@ -8,10 +8,10 @@ import type { AvailableChainId } from "@/constants/chains";
 const VotingPower = ({ totalSupply }: { totalSupply: number }) => {
   const { address, chainId } = useAccount();
   const { data: votingPower = 0, isLoading: isVotingPowerLoading } = useQuery({
-    queryKey: ["votingPower", address],
+    queryKey: ["votingPower", address, chainId],
     queryFn: () =>
       getVotesForUser(address || "", (chainId as AvailableChainId) || 48898),
-    enabled: !!address,
+    enabled: !!address && !!chainId,
   });
 
   const votingPowerPercentage = (votingPower / totalSupply) * 100;

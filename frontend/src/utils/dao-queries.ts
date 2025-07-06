@@ -1,5 +1,6 @@
 import type { AvailableChainId } from "@/constants/chains";
 import {
+  chainNameMapper,
   contractReadPublic,
   getContractAddress,
   type AvailableContractName,
@@ -100,12 +101,23 @@ export const totalSupplyETHToken = async ({
   }
 };
 
-export const getTreasuryETHTokenBalance = async (): Promise<number> => {
+export const getTreasuryETHTokenBalance = async (
+  chainId?: AvailableChainId
+): Promise<number> => {
+  // const treasuryAddress = "0x1416C74A29eC92Ccdd4b426316E6dfabcac85AE1";
+  // const ethTokenAddress = "0xa1e5d49E35bAE2d4Ec6e940c9eFF3b77079F4C50";
+
   try {
     const result = await contractReadPublic({
       contractName: "ETHToken",
       functionName: "balanceOf",
-      args: [getContractAddress("Treasury", "sepolia")],
+      args: [
+        getContractAddress(
+          "Treasury",
+          chainNameMapper[(chainId as AvailableChainId) || "sepolia"]
+        ),
+      ],
+      chainId,
     });
 
     return divideOnWei(result as bigint);
@@ -115,14 +127,14 @@ export const getTreasuryETHTokenBalance = async (): Promise<number> => {
   }
 };
 
-export const getETHTokenMetrics = async (chainId?: number | undefined) => {
+export const getETHTokenMetrics = async (
+  chainId?: AvailableChainId | undefined
+) => {
   await wait(3000);
 
   try {
     const [totalSupply, tokenName, tokenSymbol] = await Promise.all([
-      totalSupplyETHToken({
-        chainId: (chainId as AvailableChainId) || sepolia.id,
-      }),
+      totalSupplyETHToken({ chainId: chainId || sepolia.id }),
       getTokenName("ETHToken"),
       getTokenSymbol("ETHToken"),
     ]);

@@ -102,7 +102,7 @@ const CastVote = ({ proposalStatus, proposalId }: CastVoteProps) => {
       setSelectedVote(data.vote);
       // Invalidate and refetch proposal votes
       queryClient.invalidateQueries({
-        queryKey: ["proposal-votes", proposalId],
+        queryKey: ["proposal-votes", proposalId, walletClient!.chain.id],
       });
     },
     onError: (error) => {

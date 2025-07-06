@@ -15,7 +15,7 @@ export type ChainName = keyof typeof contractAddresses;
 
 export type ContractName = keyof (typeof contractAddresses)[ChainName];
 
-const chainNameMapper: Record<AvailableChainId, ChainName> = {
+export const chainNameMapper: Record<AvailableChainId, ChainName> = {
   11155111: "sepolia",
   48898: "garfield",
   545: "flow",

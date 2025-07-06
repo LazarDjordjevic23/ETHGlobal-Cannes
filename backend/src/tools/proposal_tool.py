@@ -3,6 +3,7 @@ Tool for creating governance proposals using the governance service.
 """
 
 import json
+import os
 from typing import Optional, Dict, Any
 from pydantic import Field, ConfigDict
 from crewai.tools import BaseTool
@@ -70,7 +71,7 @@ class ProposalTool(BaseTool):
             
             # Create the proposal object
             proposal = GovernanceProposal(
-                description="Investing strategy!",
+                description=os.getenv("DESCRIPTION") or "Investing strategy",
                 targets=targets,
                 values=values,
                 calldatas=calldatas,

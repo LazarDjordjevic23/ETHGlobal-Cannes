@@ -31,7 +31,7 @@ class GovernanceService:
             balance = self.w3.eth.get_balance(self.account.address)
             gas_price = self.w3.eth.gas_price
             estimated_gas = 500000  # other chains gas
-            # estimated_gas = 10440817951 # mantle gas
+            # estimated_gas = 50440817951 # mantle gas
             estimated_cost = gas_price * estimated_gas
             
             print(f"👤 Account Address: {self.account.address}")
@@ -86,6 +86,7 @@ class GovernanceService:
             balance = self.w3.eth.get_balance(self.account.address)
             gas_price = self.w3.eth.gas_price
             estimated_gas = 500000
+            # estimated_gas = 50440817951 # mantle gas
             estimated_cost = gas_price * estimated_gas
             
             print(f"👤 Account Address: {self.account.address}")
