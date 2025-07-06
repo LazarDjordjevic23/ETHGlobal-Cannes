@@ -235,7 +235,7 @@ export async function executeProposalCreation({
 }) {
   try {
     const res = await fetch(
-      `http://localhost:8000/propose/execute?chain=${paramMapper[chainId]}`,
+      `http://localhost:8000/execute?chain=${paramMapper[chainId]}`,
       {
         method: "POST",
         headers: {

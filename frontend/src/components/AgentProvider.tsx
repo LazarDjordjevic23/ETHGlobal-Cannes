@@ -8,7 +8,15 @@ interface AgentProviderProps {
 }
 
 export const AgentProvider = ({ children }: AgentProviderProps) => {
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>({
+    id: 3,
+    name: "Capitalist Agent 💵",
+    description:
+      "📈🏦 Resources must flow to those who deliver the most value, driving growth through efficiency and competition 💼🔥.",
+    status: "Pumping",
+    strategy: "Moon Mission 🚀",
+    risk: "YOLO",
+  });
 
   const [proposalData, setProposalData] = useState<ProposalResponse | null>(
     null
