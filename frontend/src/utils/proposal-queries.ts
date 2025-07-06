@@ -161,7 +161,7 @@ export async function castVote(
 
 const paramMapper: Record<AvailableChainId, string> = {
   11155111: "ethereum",
-  48898: "zuircuit",
+  48898: "zircuit",
   545: "flow",
   5003: "mantle",
 };

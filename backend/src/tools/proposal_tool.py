@@ -70,7 +70,7 @@ class ProposalTool(BaseTool):
             
             # Create the proposal object
             proposal = GovernanceProposal(
-                description="Investing strategy ethcannes",
+                description="Investing strategy!",
                 targets=targets,
                 values=values,
                 calldatas=calldatas,
