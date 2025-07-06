@@ -14,6 +14,8 @@ import {
 } from "../../utils/proposal-queries";
 import { useAgent } from "@/contexts/agent-context";
 import { totalSupplyDaoToken } from "@/utils/dao-queries";
+import { useAccount } from "wagmi";
+import type { AvailableChainId } from "@/constants/chains";
 
 export interface Votes {
   for: number;
@@ -52,17 +54,20 @@ const ProposalDetail = () => {
   const navigate = useNavigate();
   const { proposalData: contextProposalData } = useAgent();
 
+  const { chainId } = useAccount();
+
   // Fetch proposal by index (assuming proposalId is the index)
   const { data: proposal } = useQuery({
     queryKey: ["last-proposal"],
-    queryFn: getLastProposal,
+    queryFn: () => getLastProposal(chainId as AvailableChainId),
     enabled: !!proposalId,
   });
 
   // Fetch votes for the proposal
   const { data: votes } = useQuery({
     queryKey: ["proposal-votes", proposal?.proposalId],
-    queryFn: () => getProposalVotes(proposal!.proposalId),
+    queryFn: () =>
+      getProposalVotes(proposal!.proposalId, chainId as AvailableChainId),
     enabled: !!proposal?.proposalId,
   });
 
@@ -70,8 +75,6 @@ const ProposalDetail = () => {
     queryKey: ["total-supply"],
     queryFn: totalSupplyDaoToken,
   });
-
-  console.log({ proposal, votes, contextProposalData });
 
   // Create details from blockchain data if proposal exists
   const getProposalDetails = () => {

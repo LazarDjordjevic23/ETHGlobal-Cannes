@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createPublicClient, http } from "viem";
-import { sepolia } from "viem/chains";
 import {
   getChainByChainId,
   getRpcUrlByChainId,
@@ -10,10 +9,18 @@ import type { Address, Abi, WalletClient } from "viem";
 
 import contractAddresses from "../../../contracts/scripts/deployments/develop-contract-addresses.json";
 import contractAbis from "../../../contracts/scripts/deployments/develop-contract-abis.json";
+import { sepolia } from "viem/chains";
 
 export type ChainName = keyof typeof contractAddresses;
 
 export type ContractName = keyof (typeof contractAddresses)[ChainName];
+
+const chainNameMapper: Record<AvailableChainId, ChainName> = {
+  11155111: "sepolia",
+  48898: "garfield",
+  545: "flow",
+  5003: "mantle",
+};
 
 export type AvailableContractName =
   | "DAOToken"
@@ -33,7 +40,7 @@ export interface ContractConfig {
 }
 export function getContractConfig(
   contractName: AvailableContractName,
-  chainName: ChainName = "sepolia"
+  chainName: ChainName
 ): ContractConfig {
   const address = contractAddresses[chainName]?.[contractName];
   const abi = contractAbis[chainName]?.[contractName];
@@ -58,7 +65,7 @@ export function getContractConfig(
 
 export function getContractAddress(
   contractName: AvailableContractName,
-  chainName: ChainName = "sepolia"
+  chainName: ChainName
 ): Address {
   const address = contractAddresses[chainName]?.[contractName];
 
@@ -73,7 +80,7 @@ export function getContractAddress(
 
 export function getContractAbi(
   contractName: AvailableContractName,
-  chainName: ChainName = "sepolia"
+  chainName: ChainName
 ): Abi {
   const abi = contractAbis[chainName]?.[contractName];
 
@@ -104,15 +111,20 @@ export const contractReadPublic = async ({
   contractAddress?: `0x${string}`;
   chainId?: AvailableChainId;
 }) => {
-  const currentChain = getChainByChainId(chainId);
+  const currentChain = getChainByChainId(chainId as AvailableChainId);
   if (!currentChain) {
     throw new Error(`Unsupported chain: ${chainId}. Please use Sepolia.`);
   }
 
+  const chainName = chainNameMapper[chainId as AvailableChainId];
+
   const rpcUrl = getRpcUrlByChainId(currentChain.id);
-  const abi = getContractAbi(contractName);
+  const abi = getContractAbi(contractName, chainName);
+
   const contractAddress =
-    passedContractAddress || getContractAddress(contractName);
+    passedContractAddress || getContractAddress(contractName, chainName);
+
+  console.log({ chainId, currentChain, contractAddress });
 
   const publicClient = createPublicClient({
     chain: currentChain,
@@ -160,10 +172,12 @@ export const contractWrite = async ({
     );
   }
 
+  const chainName = chainNameMapper[walletClient.chain.id as AvailableChainId];
+
   const rpcUrl = getRpcUrlByChainId(currentChain.id);
-  const abi = getContractAbi(contractName);
+  const abi = getContractAbi(contractName, chainName);
   const contractAddress =
-    passedContractAddress || getContractAddress(contractName);
+    passedContractAddress || getContractAddress(contractName, chainName);
 
   const publicClient = createPublicClient({
     chain: currentChain,

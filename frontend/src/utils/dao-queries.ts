@@ -91,7 +91,7 @@ export const getTreasuryETHTokenBalance = async (): Promise<number> => {
     const result = await contractReadPublic({
       contractName: "ETHToken",
       functionName: "balanceOf",
-      args: [getContractAddress("Treasury")],
+      args: [getContractAddress("Treasury", "sepolia")],
     });
 
     return divideOnWei(result as bigint);

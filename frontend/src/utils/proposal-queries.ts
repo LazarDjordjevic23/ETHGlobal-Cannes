@@ -2,6 +2,7 @@ import type { WalletClient } from "viem";
 import { contractReadPublic, contractWrite } from "./contract-interactions";
 import { divideOnWei } from "./web3";
 import type { AvailableChainId } from "@/constants/chains";
+import { flowTestnet } from "viem/chains";
 
 export interface ProposalDetails {
   index: number;
@@ -17,15 +18,18 @@ function decodeCalldata(): string {
   return "Treasury.execute(Strategy, 0 ETH, executeStrategy1(ETHToken, 1 ETH))";
 }
 
-export async function getLastProposal(): Promise<ProposalDetails | null> {
+export async function getLastProposal(
+  chainId: AvailableChainId
+): Promise<ProposalDetails | null> {
   try {
     const proposalCount = await contractReadPublic({
       contractName: "Governance",
       functionName: "proposalCount",
       args: [],
+      chainId: flowTestnet.id,
     });
 
-    console.log(`Total proposals: ${proposalCount}`);
+    console.log({ proposalCount });
 
     if (proposalCount === 0n) {
       console.log("No proposals found");
@@ -37,6 +41,7 @@ export async function getLastProposal(): Promise<ProposalDetails | null> {
       contractName: "Governance",
       functionName: "proposalDetailsAt",
       args: [lastIndex],
+      chainId,
     });
 
     const [proposalId, targets, values, calldatas, descriptionHash] =
@@ -46,6 +51,7 @@ export async function getLastProposal(): Promise<ProposalDetails | null> {
       contractName: "Governance",
       functionName: "proposalProposer",
       args: [proposalId],
+      chainId,
     });
 
     let executionFunction: string | null = null;
@@ -69,13 +75,15 @@ export async function getLastProposal(): Promise<ProposalDetails | null> {
 }
 
 export async function getProposalByIndex(
-  index: number
+  index: number,
+  chainId: AvailableChainId
 ): Promise<ProposalDetails | null> {
   try {
     const proposalDetails = await contractReadPublic({
       contractName: "Governance",
       functionName: "proposalDetailsAt",
       args: [index],
+      chainId,
     });
 
     const [proposalId, targets, values, calldatas, descriptionHash] =
@@ -85,6 +93,7 @@ export async function getProposalByIndex(
       contractName: "Governance",
       functionName: "proposalProposer",
       args: [proposalId],
+      chainId,
     });
 
     let executionFunction: string | null = null;
@@ -107,19 +116,22 @@ export async function getProposalByIndex(
   }
 }
 
-export async function getAllProposals(): Promise<ProposalDetails[]> {
+export async function getAllProposals(
+  chainId: AvailableChainId
+): Promise<ProposalDetails[]> {
   try {
     const proposalCount = await contractReadPublic({
       contractName: "Governance",
       functionName: "proposalCount",
+      chainId: flowTestnet.id,
       args: [],
     });
 
     const count = Number(proposalCount);
-    console.log(`Total proposals: ${count}`);
+    // console.log(`Total proposals: ${count}`);
 
     if (count === 0) {
-      console.log("No proposals found");
+      // console.log("No proposals found");
       return [];
     }
 
@@ -127,15 +139,17 @@ export async function getAllProposals(): Promise<ProposalDetails[]> {
 
     for (let i = 0; i < count; i++) {
       try {
-        const proposal = await getProposalByIndex(i);
+        const proposal = await getProposalByIndex(i, chainId);
         if (proposal) {
           proposals.push(proposal);
-          console.log(`✅ Fetched proposal ${i + 1}/${count}`);
+          // console.log(`✅ Fetched proposal ${i + 1}/${count}`);
         }
       } catch (error) {
         console.error(`❌ Failed to fetch proposal ${i}:`, error);
       }
     }
+
+    console.log({ proposals });
 
     return proposals;
   } catch (error) {
@@ -144,27 +158,16 @@ export async function getAllProposals(): Promise<ProposalDetails[]> {
   }
 }
 
-export async function getProposalCount(): Promise<number> {
-  try {
-    const count = await contractReadPublic({
-      contractName: "Governance",
-      functionName: "proposalCount",
-      args: [],
-    });
-
-    return Number(count);
-  } catch (error) {
-    console.error("Error fetching proposal count:", error);
-    return 0;
-  }
-}
-
-export async function getProposalVotes(proposalId: string) {
+export async function getProposalVotes(
+  proposalId: string,
+  chainId: AvailableChainId
+) {
   try {
     const votes = (await contractReadPublic({
       contractName: "Governance",
       functionName: "proposalVotes",
       args: [proposalId],
+      chainId,
     })) as [bigint, bigint, bigint];
 
     return {
