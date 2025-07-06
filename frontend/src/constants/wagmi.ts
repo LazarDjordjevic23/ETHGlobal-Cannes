@@ -1,11 +1,12 @@
-import { arbitrum, arbitrumSepolia } from "viem/chains";
+import { sepolia, zircuitGarfieldTestnet, flowTestnet } from "viem/chains";
 import { createConfig, http } from "wagmi";
 
 export const wagminConfig = createConfig({
-  chains: [arbitrum, arbitrumSepolia],
+  chains: [sepolia, zircuitGarfieldTestnet, flowTestnet],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [arbitrumSepolia.id]: http(),
-    [arbitrum.id]: http(),
+    [sepolia.id]: http(),
+    [zircuitGarfieldTestnet.id]: http(),
+    [flowTestnet.id]: http(),
   },
 });

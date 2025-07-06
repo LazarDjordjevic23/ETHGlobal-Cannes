@@ -1,8 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}", "./index.html"],
   theme: {
     extend: {
+      colors: {
+        divider: {
+          primary: "rgb(234, 236, 240)",
+        },
+      },
       borderRadius: {
         0: "0px",
         0.5: "0.125rem", // 2px

@@ -1,29 +1,70 @@
-import { arbitrum, arbitrumSepolia } from "viem/chains";
+import {
+  flowTestnet,
+  sepolia,
+  zircuitGarfieldTestnet,
+  mantleSepoliaTestnet,
+} from "viem/chains";
 
-const arbitrumOneConfig = {
-  chainId: arbitrum.id,
-  networkId: arbitrum.id,
-  name: arbitrum.name,
-  iconUrls: ["https://app.dynamic.xyz/assets/networks/arbitrum.svg"],
-  nativeCurrency: arbitrum.nativeCurrency,
-  rpcUrls: ["https://arb1.arbitrum.io/rpc"], // need to add our custom RPC for Traia
-  blockExplorerUrls: [arbitrum.blockExplorers.default.url],
+const sepoliaConfig = {
+  chainId: sepolia.id,
+  networkId: sepolia.id,
+  name: sepolia.name,
+  iconUrls: ["https://app.dynamic.xyz/assets/networks/eth.svg"],
+  nativeCurrency: sepolia.nativeCurrency,
+  rpcUrls: [sepolia.rpcUrls.default.http[0]],
+  blockExplorerUrls: [sepolia.blockExplorers.default.url],
 };
 
-const arbitrumSepoliaConfig = {
-  chainId: arbitrumSepolia.id,
-  networkId: arbitrumSepolia.id,
-  name: arbitrumSepolia.name,
-  iconUrls: ["https://app.dynamic.xyz/assets/networks/arbitrum.svg"],
-  nativeCurrency: arbitrumSepolia.nativeCurrency,
-  rpcUrls: [
-    "https://arbitrum-sepolia.core.chainstack.com/873cbc1f5ef0abc2cb778e1693c7c002", // this is hord RPC, should change to our custom RPC for Traia
-  ],
-  blockExplorerUrls: [arbitrumSepolia.blockExplorers.default.url],
+const zircuitGarfieldTestnetConfig = {
+  chainId: zircuitGarfieldTestnet.id,
+  networkId: zircuitGarfieldTestnet.id,
+  name: zircuitGarfieldTestnet.name,
+  iconUrls: ["https://app.dynamic.xyz/assets/networks/eth.svg"],
+  nativeCurrency: zircuitGarfieldTestnet.nativeCurrency,
+  rpcUrls: [zircuitGarfieldTestnet.rpcUrls.default.http[0]],
+  blockExplorerUrls: [zircuitGarfieldTestnet.blockExplorers.default.url],
 };
 
-export const evmNetworks = [arbitrumOneConfig, arbitrumSepoliaConfig];
+const flowTestnetConfig = {
+  chainId: flowTestnet.id,
+  networkId: flowTestnet.id,
+  name: flowTestnet.name,
+  iconUrls: ["https://app.dynamic.xyz/assets/networks/eth.svg"],
+  nativeCurrency: flowTestnet.nativeCurrency,
+  rpcUrls: [flowTestnet.rpcUrls.default.http[0]],
+  blockExplorerUrls: [flowTestnet.blockExplorers.default.url],
+};
 
-export const getRpcUrlByChainId = (chainId: number) => {
-  return evmNetworks.find((chain) => chain.chainId === chainId)?.rpcUrls[0];
+const mentholTestnetConfig = {
+  chainId: mantleSepoliaTestnet.id,
+  networkId: mantleSepoliaTestnet.id,
+  name: mantleSepoliaTestnet.name,
+  iconUrls: ["https://app.dynamic.xyz/assets/networks/eth.svg"],
+  nativeCurrency: mantleSepoliaTestnet.nativeCurrency,
+  rpcUrls: [mantleSepoliaTestnet.rpcUrls.default.http[0]],
+  blockExplorerUrls: [mantleSepoliaTestnet.blockExplorers.default.url],
+};
+
+export const evmNetworks = [
+  sepoliaConfig,
+  zircuitGarfieldTestnetConfig,
+  flowTestnetConfig,
+  mentholTestnetConfig,
+];
+
+export type AvailableChainId = 11155111 | 48898 | 545 | 5003;
+
+export const availableChains = [
+  sepolia,
+  zircuitGarfieldTestnet,
+  flowTestnet,
+  mantleSepoliaTestnet,
+];
+
+export const getChainByChainId = (chainId: AvailableChainId) => {
+  return availableChains.find((chain) => chain.id === chainId) || sepolia;
+};
+
+export const getRpcUrlByChainId = (chainId: AvailableChainId) => {
+  return availableChains.find((chain) => chain.id === chainId)?.rpcUrls[0];
 };
